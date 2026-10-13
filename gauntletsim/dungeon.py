@@ -6,6 +6,13 @@ from dataclasses import dataclass, field
 
 from gauntletsim.game_rules import GameRules
 from gauntletsim.geometry import DungeonGeometry, generate_dungeon_geometry
+from gauntletsim.hub import (
+    HubLayout,
+    HubStation,
+    apply_hub_blocks,
+    build_hub_layout,
+    nearest_approach_tile,
+)
 from gauntletsim.map_generator import DungeonLayout, generate_layout, validate_layout_rules
 from gauntletsim.movement import MovementEngine
 from gauntletsim.pathfinding import reachable_coords, shortest_path
@@ -21,6 +28,7 @@ class DungeonState:
     move_ticks: int = 1
     geometry: DungeonGeometry | None = None
     movement: MovementEngine | None = None
+    hub: HubLayout | None = None
     rules_errors: list[str] = field(default_factory=list)
 
     @classmethod
@@ -29,9 +37,15 @@ class DungeonState:
         errors = validate_layout_rules(layout, rules)
         light = int(rules.get("timing", "room_light_ticks"))
         geometry = generate_dungeon_geometry(rules, layout.rooms, master_seed)
+        hub = build_hub_layout(rules, layout.start)
+        apply_hub_blocks(geometry, hub)
         movement = MovementEngine.create(rules, geometry)
         player = PlayerState(coord=layout.start, tick=0)
-        player.tile = geometry.spawn_tile(layout.start)
+        # Spawn adjacent to tool storage (center pedestal is blocked).
+        discovered = {layout.start}
+        player.tile = nearest_approach_tile(
+            geometry, hub, HubStation.TOOL_STORAGE, discovered=discovered
+        )
         player.run_energy = int(rules.get("timing", "run_energy_max_units"))
         state = cls(
             layout=layout,
@@ -39,6 +53,7 @@ class DungeonState:
             light_ticks=light,
             geometry=geometry,
             movement=movement,
+            hub=hub,
             rules_errors=errors,
         )
         # Start is discovered at generation time.

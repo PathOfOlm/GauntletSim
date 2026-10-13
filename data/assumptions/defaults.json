@@ -183,6 +183,22 @@
       "range": {"min": 0.0, "max": 30.0},
       "unit": "kg",
       "research_status": "still_unknown"
+    },
+    {
+      "id": "A-HUB-STATIONS-01",
+      "label": "Start-room hub station local tiles for room_size=16 (quadrants from wiki Starting Room image; exact tile coords unverified)",
+      "parameter": "topology.hub_station_local_tiles",
+      "default": {
+        "singing_bowl": [4, 4],
+        "teleport_platform": [11, 4],
+        "tool_storage": [8, 8],
+        "water_pump": [12, 7],
+        "range": [11, 12],
+        "recipe_guides": [4, 12]
+      },
+      "range": {"description": "local [lx,ly] per station name; N=low ly in geometry"},
+      "unit": "local_tile_map",
+      "research_status": "constrained"
     }
   ]
 }

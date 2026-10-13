@@ -86,6 +86,16 @@
 | Intended module | `geometry` / `tile_pathfinding` |
 | Test id | `test_walls_force_detour` |
 
+### R-TOPO-07 — Starting-room hub stations
+
+| Field | Value |
+|-------|-------|
+| Statement | Start room contains Singing Bowl, Range, Water Pump, Tool Storage, Teleport Platform, and recipe bookstands. Wiki annotated image shows **quadrants** (bowl NW, teleport NE, range SE, recipes SW, pump on east wall, tools center) and **2-tile** exits. Exact local tile coordinates for a 16×16 model are assumptions (`A-HUB-STATIONS-01`). Singing/cook/fill actions require pathing to the matching station. |
+| Source | https://oldschool.runescape.wiki/w/File:The_Gauntlet_Starting_Room.png ; https://oldschool.runescape.wiki/w/The_Gauntlet |
+| Confidence | `verified` (stations exist + quadrants from wiki image); tile coords `unknown` → assumption |
+| Intended module | `hub` / `prep` |
+| Test id | `test_bowl_to_pump_costs_move_ticks` |
+
 ---
 
 ## 2. Exploration & prep timing

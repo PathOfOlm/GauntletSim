@@ -39,7 +39,11 @@ def test_room_geometry_size(rules: GameRules) -> None:
     assert dungeon.geometry.room_size == 16
     start = dungeon.layout.start
     rt = dungeon.geometry.rooms[start]
-    assert rt.local_walkable(*rt.center_local())
+    # Center is tool-storage (blocked); spawn / center_tile must still be walkable.
+    assert not rt.local_walkable(*rt.center_local())
+    spawn = rt.center_tile()
+    lx, ly = dungeon.geometry.local_of(spawn)
+    assert rt.local_walkable(lx, ly)
 
 
 def test_blocked_tile_pathing_avoids_walls(rules: GameRules) -> None:
@@ -126,8 +130,7 @@ def test_gather_and_craft_still_spend_ticks(rules: GameRules, cfg: AppConfig) ->
     if sim.player.inventory.count(ItemId.SHARDS) < 40:
         sim.player.inventory.add(ItemId.SHARDS, 200)
     craft_before = sim.ledger.craft
-    ticks = sim.crafting.craft_basic_weapon(sim.player.inventory, WeaponStyle.BOW)
-    sim._spend(ticks, "craft", "craft bow basic")
+    sim.hub_craft_basic_weapon(WeaponStyle.BOW)
     assert sim.ledger.craft == craft_before + 1
 
 

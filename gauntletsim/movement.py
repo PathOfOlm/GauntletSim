@@ -187,11 +187,31 @@ class MovementEngine:
         *,
         allow_undiscovered: Coord | None = None,
     ) -> list[Tile] | None:
+        if player.tile is None:
+            return None
         return astar_path(
             self.geometry,
             player.tile,
             goal,
             walkable=self.walkable_fn(rooms, allow_undiscovered=allow_undiscovered),
+        )
+
+    def travel_to_tile(
+        self,
+        player,
+        goal: Tile,
+        rooms: dict,
+        *,
+        prep_limit: int,
+    ) -> int:
+        """Path and walk/run to an already-discovered walkable tile."""
+        if player.tile == goal:
+            return 0
+        path = self.path_to_tile(player, goal, rooms)
+        if path is None:
+            return 0
+        return self.follow_path(
+            player, path, rooms, prep_limit=prep_limit, bucket="move"
         )
 
     def travel_to_room(

@@ -9,6 +9,13 @@ from gauntletsim.crafting import ArmourSlot, CraftingBench, WeaponStyle
 from gauntletsim.demibosses import PrepEncounters
 from gauntletsim.dungeon import DungeonState
 from gauntletsim.game_rules import GameRules
+from gauntletsim.hub import (
+    HubError,
+    HubStation,
+    is_adjacent_to_station,
+    nearest_approach_tile,
+    require_start_room,
+)
 from gauntletsim.inventory import ItemId
 from gauntletsim.movement import MovementEngine, TickLedger
 from gauntletsim.player import PlayerState
@@ -37,7 +44,8 @@ class PrepSim:
         dungeon = DungeonState.generate(rules, config.sim.master_seed)
         start = dungeon.layout.start
         account_player = PlayerState.from_account(start, config.account)
-        account_player.tile = dungeon.geometry.spawn_tile(start) if dungeon.geometry else None
+        # Keep hub-aware spawn from dungeon.generate (adjacent to tool storage).
+        account_player.tile = dungeon.player.tile
         account_player.run_energy = int(rules.get("timing", "run_energy_max_units"))
         dungeon.player = account_player
         dungeon.room(start).discovered = True
@@ -167,7 +175,15 @@ class PrepSim:
         self.player.inventory.remove(ItemId.TELEPORT_CRYSTAL)
         start = self.dungeon.layout.start
         self.player.coord = start
-        if self.dungeon.geometry is not None:
+        hub = self.dungeon.hub
+        if self.dungeon.geometry is not None and hub is not None:
+            self.player.tile = nearest_approach_tile(
+                self.dungeon.geometry,
+                hub,
+                HubStation.TOOL_STORAGE,
+                discovered={start},
+            )
+        elif self.dungeon.geometry is not None:
             self.player.tile = self.dungeon.geometry.spawn_tile(start)
         self._spend(ticks, "teleport", "teleport crystal → start")
         return True
@@ -179,6 +195,101 @@ class PrepSim:
 
     def at_hub(self) -> bool:
         return self.dungeon.room(self.player.coord).kind == RoomKind.START
+
+    def at_station(self, station: HubStation) -> bool:
+        hub = self.dungeon.hub
+        if hub is None or self.dungeon.geometry is None:
+            return self.at_hub()  # coarse mode: room presence only
+        return is_adjacent_to_station(
+            self.dungeon.geometry, hub, self.player.tile, station
+        )
+
+    def approach_station(self, station: HubStation) -> int:
+        """Walk/run to a tile adjacent to a hub station; returns move ticks spent."""
+        if not self.use_tile_pathing or self.dungeon.hub is None:
+            if not self.at_hub():
+                self.go_to(self.dungeon.layout.start)
+            return 0
+        hub = self.dungeon.hub
+        geom = self.dungeon.geometry
+        assert geom is not None
+        if self.player.coord != hub.start:
+            self.go_to(hub.start)
+        if self.timed_out():
+            return 0
+        if self.at_station(station):
+            return 0
+        goal = nearest_approach_tile(
+            geom, hub, station, discovered=self.dungeon.discovered_coords()
+        )
+        before = self.player.tick
+        self.movement.travel_to_tile(
+            self.player, goal, self.dungeon.rooms, prep_limit=self.prep_limit
+        )
+        spent = max(0, self.player.tick - before)
+        if spent:
+            self.log.append(f"t={self.player.tick}: move → {station.value} ({spent} ticks)")
+        return spent
+
+    def _require_station(self, station: HubStation) -> None:
+        if not self.use_tile_pathing or self.dungeon.hub is None:
+            if not self.at_hub():
+                raise HubError(f"must be in start room for {station.value}")
+            return
+        require_start_room(self.player.coord, self.dungeon.hub)
+        if not self.at_station(station):
+            raise HubError(f"must be adjacent to {station.value}")
+
+    def hub_craft_basic_weapon(self, style: WeaponStyle) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.craft_basic_weapon(self.player.inventory, style)
+        self._spend(ticks, "craft", f"craft {style.value} basic @ bowl")
+        return ticks
+
+    def hub_upgrade_weapon_attuned(self, style: WeaponStyle) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.upgrade_weapon_attuned(self.player.inventory, style)
+        self._spend(ticks, "craft", f"craft {style.value} attuned @ bowl")
+        return ticks
+
+    def hub_upgrade_weapon_perfected(self, style: WeaponStyle) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.upgrade_weapon_perfected(self.player.inventory, style)
+        self._spend(ticks, "craft", f"craft {style.value} perfected @ bowl")
+        return ticks
+
+    def hub_craft_armour_basic(self, slot: ArmourSlot) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.craft_armour_basic(self.player.inventory, slot)
+        self._spend(ticks, "craft", f"craft {slot.value} basic @ bowl")
+        return ticks
+
+    def hub_craft_vial(self) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.craft_vial(self.player.inventory)
+        self._spend(ticks, "craft", "craft vial @ bowl")
+        return ticks
+
+    def hub_fill_vial(self) -> int:
+        self.approach_station(HubStation.WATER_PUMP)
+        self._require_station(HubStation.WATER_PUMP)
+        ticks = self.crafting.fill_vial(self.player.inventory)
+        self._spend(ticks, "craft", "fill vial @ pump")
+        return ticks
+
+    def hub_cook_paddlefish(self) -> tuple[int, bool]:
+        self.approach_station(HubStation.RANGE)
+        self._require_station(HubStation.RANGE)
+        ticks, ok = self.crafting.cook_paddlefish(
+            self.player.inventory, self.config.account.cooking
+        )
+        self._spend(ticks, "craft", "cook paddlefish @ range" if ok else "burn @ range")
+        return ticks, ok
 
     def demo_prep_slice(self) -> None:
         """
@@ -234,52 +345,36 @@ class PrepSim:
             return
 
         inv = self.player.inventory
-        if inv.has(ItemId.WEAPON_FRAME):
-            self._spend(
-                self.crafting.craft_basic_weapon(inv, WeaponStyle.BOW),
-                "craft",
-                "craft bow basic",
-            )
-        if inv.has(ItemId.BOW_BASIC) and inv.count(ItemId.SHARDS) >= 50:
-            self._spend(
-                self.crafting.upgrade_weapon_attuned(inv, WeaponStyle.BOW),
-                "craft",
-                "craft bow attuned",
-            )
+        if inv.has(ItemId.WEAPON_FRAME) and not self.timed_out():
+            self.hub_craft_basic_weapon(WeaponStyle.BOW)
+        if inv.has(ItemId.BOW_BASIC) and inv.count(ItemId.SHARDS) >= 50 and not self.timed_out():
+            self.hub_upgrade_weapon_attuned(WeaponStyle.BOW)
         if (
             inv.has(ItemId.BOW_ATTUNED)
             and inv.has(ItemId.BOWSTRING)
             and not self.timed_out()
         ):
-            self._spend(
-                self.crafting.upgrade_weapon_perfected(inv, WeaponStyle.BOW),
-                "craft",
-                "craft bow perfected",
-            )
+            self.hub_upgrade_weapon_perfected(WeaponStyle.BOW)
         if (
             inv.has(ItemId.ORE)
             and inv.has(ItemId.BARK)
             and inv.has(ItemId.LINUM)
             and inv.count(ItemId.SHARDS) >= 50
+            and not self.timed_out()
         ):
-            self._spend(
-                self.crafting.craft_armour_basic(inv, ArmourSlot.HELM),
-                "craft",
-                "craft helm basic",
-            )
+            self.hub_craft_armour_basic(ArmourSlot.HELM)
 
-        cooking = self.config.account.cooking
         while inv.has(ItemId.RAW_PADDLEFISH) and not self.timed_out():
-            ticks, ok = self.crafting.cook_paddlefish(inv, cooking)
-            self._spend(ticks, "craft", "cook paddlefish" if ok else "burn paddlefish")
+            self.hub_cook_paddlefish()
 
         if (
             inv.has(ItemId.GRYM_LEAF)
             and inv.count(ItemId.SHARDS) >= 20
             and not self.timed_out()
         ):
-            self._spend(self.crafting.craft_vial(inv), "craft", "craft vial")
-            self._spend(self.crafting.fill_vial(inv), "craft", "fill vial")
+            self.hub_craft_vial()
+            self.hub_fill_vial()
+            # Inventory combines — no extra hub station (pestle anywhere).
             self._spend(self.crafting.make_grym_unf(inv), "craft", "grym unf")
             self._spend(self.crafting.make_egniol(inv), "craft", "egniol")
 

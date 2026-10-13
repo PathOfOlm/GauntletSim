@@ -29,6 +29,7 @@ Phase 1 delivers research, machine-readable rules/assumptions, config, and a CLI
 | `gauntletsim/geometry.py` | Intra-room tiles, doorways, walls | 3.5 |
 | `gauntletsim/tile_pathfinding.py` | A* on walkable tiles (8-dir) | 3.5 |
 | `gauntletsim/movement.py` | Walk/run ticks, energy, tick ledger | 3.5 |
+| `gauntletsim/hub.py` | Start-room stations; approach tiles | 3.5 |
 | `combat` (future) | Tick combat vs mobs | 4 |
 | `boss` (future) | Corrupted Hunllef subsystem | 4 |
 | `strategy` (future) | Prep/boss policies A–D | 5 |

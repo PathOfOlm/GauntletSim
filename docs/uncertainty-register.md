@@ -39,6 +39,7 @@ Open assumptions after user answers + wiki recheck. Defaults in `data/assumption
 | `A-WALL-DENSITY-01` | still_unknown | Interior blocked-tile density (spawnable walls) | `topology.interior_wall_density` | 0–0.35 (default 0.12) |
 | `A-TELEPORT-TICKS-01` | still_unknown | Teleport crystal activate ticks | `timing.teleport_crystal_ticks` | 1–4 (default 1) |
 | `A-PREP-WEIGHT-01` | still_unknown | Carried weight (kg) for run-energy drain in prep | `player.prep_weight_kg` | 0–30 (default 0) |
+| `A-HUB-STATIONS-01` | constrained | Start-room station local tiles (wiki quadrants; exact coords unverified) | `topology.hub_station_local_tiles` | map of station→[lx,ly] |
 
 ## Wiki check notes (items user asked to verify)
 
