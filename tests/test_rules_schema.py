@@ -177,3 +177,22 @@ def test_rules_egniol_stamina_prayer() -> None:
 def test_rules_stomp_trigger() -> None:
     rules = GameRules.load()
     assert rules.get("boss", "stomp_trigger") == "on_attack_tick"
+
+
+def test_rules_room_light_ticks() -> None:
+    rules = GameRules.load()
+    assert rules.get("timing", "room_light_ticks") == 1
+
+
+def test_rules_demi_guaranteed_count() -> None:
+    rules = GameRules.load()
+    assert rules.get("topology", "demi_boss_guaranteed_count") == 4
+    assert rules.get("enemies", "demi_boss_type_uniform") is True
+
+
+def test_rules_scorpion_wolf_stats() -> None:
+    rules = GameRules.load()
+    stats = rules.get("enemies", "combat_stats")
+    assert stats["scorpion"]["combat_level"] == 89
+    assert stats["wolf"]["combat_level"] == 97
+    assert stats["wolf"]["hitpoints"] == 38

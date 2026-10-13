@@ -28,7 +28,11 @@
     "wiki-corrupted-bear": "https://oldschool.runescape.wiki/w/Corrupted_Bear",
     "wiki-corrupted-dragon": "https://oldschool.runescape.wiki/w/Corrupted_Dragon",
     "wiki-corrupted-dark-beast": "https://oldschool.runescape.wiki/w/Corrupted_Dark_Beast",
-    "wiki-corrupt-fishing-spot": "https://oldschool.runescape.wiki/w/Corrupt_Fishing_Spot"
+    "wiki-corrupt-fishing-spot": "https://oldschool.runescape.wiki/w/Corrupt_Fishing_Spot",
+    "wiki-corrupted-scorpion": "https://oldschool.runescape.wiki/w/Corrupted_Scorpion",
+    "wiki-corrupted-wolf": "https://oldschool.runescape.wiki/w/Corrupted_Wolf",
+    "wiki-corrupt-deposit": "https://oldschool.runescape.wiki/w/Corrupt_Deposit",
+    "jagex-summer-sweep-2026": "https://secure.runescape.com/m=news/summer-sweep-up-gear--pvm-changes?oldschool=1"
   },
   "timing": {
     "tick_seconds": {
@@ -105,6 +109,14 @@
         "wiki-egniol",
         "wiki-stamina",
         "wiki-energy"
+      ]
+    },
+    "room_light_ticks": {
+      "value": 1,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-crystal-sceptre",
+        "wiki-gauntlet"
       ]
     }
   },
@@ -214,6 +226,21 @@
         "wiki-corrupted-dragon",
         "wiki-corrupted-dark-beast"
       ]
+    },
+    "demi_boss_guaranteed_count": {
+      "value": 4,
+      "confidence": "verified",
+      "source_ids": [
+        "jagex-summer-sweep-2026",
+        "wiki-gauntlet"
+      ]
+    },
+    "demi_boss_type_weights_equal": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "jagex-summer-sweep-2026"
+      ]
     }
   },
   "resources": {
@@ -298,6 +325,13 @@
       "confidence": "verified",
       "source_ids": [
         "wiki-corrupt-fishing-spot"
+      ]
+    },
+    "ore_gather_always_succeeds": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupt-deposit"
       ]
     }
   },
@@ -620,17 +654,50 @@
           "max_hit": 48,
           "attack_speed_ticks": 4,
           "style": "ranged"
+        },
+        "scorpion": {
+          "combat_level": 89,
+          "hitpoints": 38,
+          "attack": 72,
+          "strength": 159,
+          "defence": 18,
+          "magic": 18,
+          "ranged": 0,
+          "max_hit": 17,
+          "attack_speed_ticks": 4,
+          "style": "slash"
+        },
+        "wolf": {
+          "combat_level": 97,
+          "hitpoints": 38,
+          "attack": 159,
+          "strength": 99,
+          "defence": 18,
+          "magic": 22,
+          "ranged": 0,
+          "max_hit": 19,
+          "attack_speed_ticks": 4,
+          "style": "crush"
         }
       },
       "confidence": "verified",
       "source_ids": [
-        "wiki-corrupted-rat",
-        "wiki-corrupted-spider",
         "wiki-corrupted-bat",
-        "wiki-corrupted-unicorn",
         "wiki-corrupted-bear",
+        "wiki-corrupted-dark-beast",
         "wiki-corrupted-dragon",
-        "wiki-corrupted-dark-beast"
+        "wiki-corrupted-rat",
+        "wiki-corrupted-scorpion",
+        "wiki-corrupted-spider",
+        "wiki-corrupted-unicorn",
+        "wiki-corrupted-wolf"
+      ]
+    },
+    "demi_boss_type_uniform": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "jagex-summer-sweep-2026"
       ]
     }
   },
@@ -857,6 +924,13 @@
     },
     "last_phase_some_tiles_never_orange": {
       "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-strategies"
+      ]
+    },
+    "floor_damage_strategies_max": {
+      "value": 25,
       "confidence": "strongly_supported",
       "source_ids": [
         "wiki-strategies"

@@ -478,15 +478,35 @@
 | Intended module | `crafting` |
 | Test id | `test_rules_paddlefish_stop_burn` |
 
-### R-MOB-05 — Corrupted mob combat stats (partial)
+### R-MOB-05 — Corrupted mob combat stats
 
 | Field | Value |
 |-------|-------|
-| Statement | Exact wiki stats ingested for Corrupted rat, spider, bat, unicorn, bear, dragon, dark beast. Weak rooms spawn up to 3; mid-level always spawn in pairs; demi-bosses spawn alone on map edges. Scorpion/wolf stats still pending (`A-MOB-STATS-SCORPION-WOLF`). |
+| Statement | Exact wiki stats for all nine Corrupted mobs (including scorpion + wolf). Weak rooms spawn up to 3; mid-level always spawn in pairs; demi-bosses spawn alone on map edges. |
 | Source | Corrupted monster wiki pages (see `data/rules` source ids) |
-| Confidence | `verified` (listed mobs); scorpion/wolf `unknown` |
+| Confidence | `verified` |
 | Intended module | `combat` / `dungeon` |
 | Test id | `test_rules_corrupted_mob_stats` |
+
+### R-TOPO-07 — Demi-boss guarantees (Summer Sweep-Up)
+
+| Field | Value |
+|-------|-------|
+| Statement | Exactly four guaranteed demi-bosses at north/east/south/west-most rooms from centre; type random (uniform). Additional demi-bosses may appear on other edge/corner rooms (count unknown → `A-DEMI-SPAWN-01`). |
+| Source | https://secure.runescape.com/m=news/summer-sweep-up-gear--pvm-changes?oldschool=1 ; wiki Changes 22 Jul 2026 |
+| Confidence | `verified` (four guarantees); extras `unknown` |
+| Intended module | `dungeon` |
+| Test id | `test_rules_demi_guaranteed_count` |
+
+### R-EXPLORE-01 — Room light ticks
+
+| Field | Value |
+|-------|-------|
+| Statement | Lighting a new room with the sceptre costs **1 tick** (user-confirmed; consistent with single click-to-enter lighting). |
+| Source | User confirmation; https://oldschool.runescape.wiki/w/Crystal_sceptre |
+| Confidence | `strongly_supported` |
+| Intended module | `dungeon` / `player` |
+| Test id | `test_rules_room_light_ticks` |
 
 ### R-CRAFT-06 — Singing bowl craft ticks
 
