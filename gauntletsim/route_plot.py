@@ -373,7 +373,7 @@ def render_route_figure(
         y=0.98,
         color="#1b2631",
     )
-    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
+    fig.subplots_adjust(left=0.05, right=0.98, top=0.88, bottom=0.14, wspace=0.18)
     return fig
 
 
