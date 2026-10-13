@@ -10,6 +10,7 @@ from gauntletsim import __version__
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.game_rules import DEFAULT_ASSUMPTIONS_PATH, DEFAULT_RULES_PATH, GameRules
 from gauntletsim.prep import PrepSim
+from gauntletsim.route import write_route_artifacts
 from gauntletsim.scenarios import (
     LOADOUT_T3_DUAL_T2ARM,
     find_loadout_seed,
@@ -70,7 +71,49 @@ def build_parser() -> argparse.ArgumentParser:
         default=80,
         help="Upper exclusive bound for --find-loadout-seed (default 80)",
     )
+    parser.add_argument(
+        "--show-route",
+        dest="show_route",
+        action="store_true",
+        default=None,
+        help="Print room-route + hub tile-trail panel after Phase 3.5 runs",
+    )
+    parser.add_argument(
+        "--no-show-route",
+        dest="show_route",
+        action="store_false",
+        help="Disable route visualization",
+    )
+    parser.add_argument(
+        "--write-route",
+        nargs="?",
+        const="results",
+        default=None,
+        metavar="DIR",
+        help="Write route ASCII+SVG under DIR (default: results/)",
+    )
     return parser
+
+
+def _want_show_route(args: argparse.Namespace, *, loadout: bool) -> bool:
+    if args.show_route is not None:
+        return bool(args.show_route)
+    # Default on for loadout; compact on for plain phase3.5 as well.
+    return True
+
+
+def _emit_route(sim: PrepSim, args: argparse.Namespace, *, stem: str) -> None:
+    print()
+    print(sim.route_panel())
+    if args.write_route is not None:
+        out_dir = Path(args.write_route)
+        written = write_route_artifacts(
+            out_dir, sim.dungeon, sim.route, stem=stem
+        )
+        print()
+        print("route_files:")
+        for path in written:
+            print(f"  {path}")
 
 
 def phase1_status_lines(rules: GameRules, config: AppConfig) -> list[str]:
@@ -162,6 +205,13 @@ def main(argv: list[str] | None = None) -> int:
             print(line)
         print()
         print(sim.ascii_map())
+        if _want_show_route(args, loadout=True):
+            seed = sim.dungeon.layout.master_seed
+            _emit_route(
+                sim,
+                args,
+                stem=f"loadout-{loadout}-seed{seed}",
+            )
         return 0 if loadout_met(sim) else 1
 
     if args.phase3 or args.phase3_5:
@@ -176,6 +226,9 @@ def main(argv: list[str] | None = None) -> int:
             print(line)
         print()
         print(sim.ascii_map())
+        if _want_show_route(args, loadout=False):
+            seed = sim.dungeon.layout.master_seed
+            _emit_route(sim, args, stem=f"phase35-demo-seed{seed}")
     elif args.phase2:
         sim = Phase2Sim.create(rules, config)
         print()

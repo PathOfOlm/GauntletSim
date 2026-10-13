@@ -8,6 +8,7 @@ import math
 from gauntletsim.geometry import DungeonGeometry, Tile, doorway_entry_tile
 from gauntletsim.game_rules import GameRules
 from gauntletsim.room import Coord, RoomKind
+from gauntletsim.route import RouteRecorder
 from gauntletsim.tile_pathfinding import astar_path
 
 
@@ -73,6 +74,7 @@ class MovementEngine:
     weight_kg: float = 0.0
     stamina_multiplier: float = 0.3
     stamina_effect_ticks: int = 200
+    route: RouteRecorder | None = None
 
     @classmethod
     def create(cls, rules: GameRules, geometry: DungeonGeometry) -> MovementEngine:
@@ -153,6 +155,7 @@ class MovementEngine:
                 player.advance(self.light_ticks, prep_limit)
                 self.ledger.light += self.light_ticks
                 spent_total += self.light_ticks
+                self._trace_player(player)
                 i += 1
                 continue
 
@@ -177,7 +180,18 @@ class MovementEngine:
             if bucket == "move":
                 self.ledger.move += 1
             spent_total += 1
+            self._trace_player(player)
         return spent_total
+
+    def _trace_player(self, player) -> None:
+        if self.route is None or player.tile is None:
+            return
+        self.route.record_position(
+            player.tile,
+            player.coord,
+            tick=int(getattr(player, "tick", 0)),
+            kind="move",
+        )
 
     def path_to_tile(
         self,

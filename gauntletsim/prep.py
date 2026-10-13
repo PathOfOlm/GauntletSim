@@ -21,6 +21,7 @@ from gauntletsim.movement import MovementEngine, TickLedger
 from gauntletsim.player import PlayerState
 from gauntletsim.resources import GatherSystem
 from gauntletsim.room import Coord, NodeType, RoomKind
+from gauntletsim.route import RouteRecorder, render_route_panel
 from gauntletsim.visualization import render_ascii
 
 
@@ -36,6 +37,7 @@ class PrepSim:
     movement: MovementEngine
     log: list[str] = field(default_factory=list)
     use_tile_pathing: bool = True
+    route: RouteRecorder = field(default_factory=RouteRecorder)
 
     @classmethod
     def create(
@@ -58,7 +60,9 @@ class PrepSim:
             else rules.prep_ticks
         )
         assert dungeon.movement is not None
-        return cls(
+        route = RouteRecorder()
+        dungeon.movement.route = route
+        sim = cls(
             rules=rules,
             config=config,
             dungeon=dungeon,
@@ -68,7 +72,17 @@ class PrepSim:
             prep_limit=limit,
             movement=dungeon.movement,
             use_tile_pathing=use_tile_pathing,
+            route=route,
         )
+        # Seed spawn into the route before any travel.
+        route.record_position(
+            account_player.tile,
+            start,
+            tick=0,
+            kind="spawn",
+            label="spawn",
+        )
+        return sim
 
     @property
     def player(self) -> PlayerState:
@@ -223,6 +237,9 @@ class PrepSim:
         elif self.dungeon.geometry is not None:
             self.player.tile = self.dungeon.geometry.spawn_tile(start)
         self._spend(ticks, "teleport", "teleport crystal → start")
+        self.route.record_teleport(
+            start, self.player.tile, tick=self.player.tick
+        )
         return True
 
     def return_to_start(self, *, prefer_teleport: bool = True) -> None:
@@ -259,7 +276,15 @@ class PrepSim:
         goal = nearest_approach_tile(
             geom, hub, station, discovered=self.dungeon.discovered_coords()
         )
-        return self._approach_tile(goal, label=station.value)
+        spent = self._approach_tile(goal, label=station.value)
+        self.route.record_event(
+            "station",
+            station.value,
+            tick=self.player.tick,
+            room=self.player.coord,
+            tile=self.player.tile,
+        )
+        return spent
 
     def approach_boss_door(self) -> int:
         """Path to the start-side doorway facing the boss room (barrier approach)."""
@@ -469,3 +494,12 @@ class PrepSim:
 
     def ascii_map(self) -> str:
         return render_ascii(self.dungeon)
+
+    def route_panel(self) -> str:
+        """ASCII room-route overlay + hub tile trail."""
+        return render_route_panel(
+            self.dungeon,
+            self.route,
+            geometry=self.dungeon.geometry,
+            hub=self.dungeon.hub,
+        )

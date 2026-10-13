@@ -9,3 +9,5 @@ build/
 venv/
 .env
 *.egg
+results/*
+!results/.gitkeep
