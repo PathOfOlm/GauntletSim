@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.crafting import ArmourSlot, WeaponStyle
 from gauntletsim.game_rules import GameRules
+from gauntletsim.hub import HubError, HubStation
 from gauntletsim.inventory import ItemId
 from gauntletsim.prep import PrepSim
 from gauntletsim.room import Coord, DemiType, MobTier, NodeType, RoomKind
@@ -407,10 +408,22 @@ class LoadoutScenario:
                 sim.log.append("egniol stop: no pestle")
                 break
             self._ensure_space(1)
-            sim.hub_craft_vial()
-            sim.hub_fill_vial()
-            sim._spend(sim.crafting.make_grym_unf(inv), "craft", "grym unf")
-            sim._spend(sim.crafting.make_egniol(inv), "craft", "egniol")
+            try:
+                sim.hub_craft_vial()
+                sim.hub_fill_vial()
+                sim._spend(sim.crafting.make_grym_unf(inv), "craft", "grym unf")
+                sim._spend(sim.crafting.make_egniol(inv), "craft", "egniol")
+            except HubError as exc:
+                sim.log.append(f"egniol hub retry: {exc}")
+                sim.approach_station(HubStation.SINGING_BOWL)
+                try:
+                    sim.hub_craft_vial()
+                    sim.hub_fill_vial()
+                    sim._spend(sim.crafting.make_grym_unf(inv), "craft", "grym unf")
+                    sim._spend(sim.crafting.make_egniol(inv), "craft", "egniol")
+                except HubError as exc2:
+                    sim.log.append(f"egniol stop: {exc2}")
+                    break
 
         # Cook paddlefish to target.
         while (
@@ -419,7 +432,16 @@ class LoadoutScenario:
             and not sim.timed_out()
         ):
             self._ensure_space(1)
-            sim.hub_cook_paddlefish()
+            try:
+                sim.hub_cook_paddlefish()
+            except HubError as exc:
+                sim.log.append(f"cook hub retry: {exc}")
+                sim.approach_station(HubStation.RANGE)
+                try:
+                    sim.hub_cook_paddlefish()
+                except HubError as exc2:
+                    sim.log.append(f"cook stop: {exc2}")
+                    break
 
         # Drop pestle / leftover raw if at goal.
         if loadout_met(sim, self.goal):
@@ -473,3 +495,90 @@ def find_loadout_seed(
         if loadout_met(sim):
             return seed, sim
     return None
+
+
+@dataclass(frozen=True)
+class LoadoutSeedScore:
+    seed: int
+    ticks: int
+    move: int
+    gather: int
+    fight: int
+    craft: int
+    rooms: int
+    steps: int
+    tiles: int
+    met: bool
+    timed_out: bool
+    error: str = ""
+
+
+def _score_one_seed(args: tuple[int, str]) -> LoadoutSeedScore:
+    """Worker for process-pool optimize (picklable top-level)."""
+    seed, loadout = args
+    try:
+        rules = GameRules.load()
+        account = AppConfig.phase1_demo().account
+        cfg = AppConfig(account=account, sim=SimConfig(master_seed=seed))
+        sim = run_loadout_scenario(rules, cfg, loadout=loadout)
+        b = sim.ledger.as_dict()
+        return LoadoutSeedScore(
+            seed=seed,
+            ticks=sim.player.tick,
+            move=b["move"],
+            gather=b["gather"],
+            fight=b["fight"],
+            craft=b["craft"],
+            rooms=len(sim.route.room_first_visit),
+            steps=len(sim.route.room_steps),
+            tiles=len(sim.route.tiles),
+            met=loadout_met(sim),
+            timed_out=sim.timed_out(),
+        )
+    except Exception as exc:  # noqa: BLE001 — sweep must not abort on one bad seed
+        return LoadoutSeedScore(
+            seed=seed,
+            ticks=10**9,
+            move=0,
+            gather=0,
+            fight=0,
+            craft=0,
+            rooms=0,
+            steps=0,
+            tiles=0,
+            met=False,
+            timed_out=True,
+            error=f"{type(exc).__name__}: {exc}",
+        )
+
+
+def optimize_loadout_seeds(
+    rules: GameRules,
+    *,
+    loadout: str = LOADOUT_T3_DUAL_T2ARM,
+    seeds: range | list[int] | None = None,
+    workers: int | None = None,
+) -> tuple[LoadoutSeedScore | None, list[LoadoutSeedScore]]:
+    """
+    Run loadout prep across many seeds in parallel; return (best, all scores).
+
+    Best = lowest ticks among successes (then move, steps, seed).
+    `rules` is accepted for API symmetry; workers reload rules themselves.
+    """
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    del rules  # workers load independently for pickling safety
+    seed_list = list(seeds if seeds is not None else range(100))
+    scores: list[LoadoutSeedScore] = []
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        futs = {
+            pool.submit(_score_one_seed, (seed, loadout)): seed for seed in seed_list
+        }
+        for fut in as_completed(futs):
+            scores.append(fut.result())
+    scores.sort(key=lambda s: s.seed)
+    ok = [s for s in scores if s.met and not s.timed_out and not s.error]
+    if not ok:
+        return None, scores
+    ok.sort(key=lambda s: (s.ticks, s.move, s.steps, s.seed))
+    return ok[0], scores

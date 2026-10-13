@@ -16,6 +16,7 @@ from gauntletsim.scenarios import (
     find_loadout_seed,
     loadout_gaps,
     loadout_met,
+    optimize_loadout_seeds,
     run_loadout_scenario,
 )
 from gauntletsim.simulation import Phase2Sim
@@ -96,6 +97,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--ascii-route",
         action="store_true",
         help="Also print/write the dense ASCII route panel",
+    )
+    parser.add_argument(
+        "--optimize-loadout",
+        type=int,
+        nargs="?",
+        const=100,
+        default=None,
+        metavar="N",
+        help=(
+            "With --loadout, sweep seeds 0..N-1 in parallel and pick lowest ticks "
+            "(default N=100)"
+        ),
+    )
+    parser.add_argument(
+        "--optimize-workers",
+        type=int,
+        default=None,
+        help="Process pool size for --optimize-loadout (default: CPU count)",
     )
     return parser
 
@@ -198,7 +217,43 @@ def main(argv: list[str] | None = None) -> int:
 
     if (args.phase3 or args.phase3_5) and args.loadout:
         loadout = args.loadout
-        if args.find_loadout_seed or args.seed is None:
+        if args.optimize_loadout is not None:
+            n = max(1, int(args.optimize_loadout))
+            best, scores = optimize_loadout_seeds(
+                rules,
+                loadout=loadout,
+                seeds=range(0, n),
+                workers=args.optimize_workers,
+            )
+            ok = [s for s in scores if s.met and not s.timed_out and not s.error]
+            err = [s for s in scores if s.error]
+            print()
+            print(
+                f"optimize_loadout: seeds=0..{n - 1} success={len(ok)} "
+                f"fail={n - len(ok) - len(err)} error={len(err)}"
+            )
+            if best is None:
+                print("optimize_loadout: no completing seed found")
+                return 1
+            print(
+                f"optimize_best: seed={best.seed} ticks={best.ticks} "
+                f"move={best.move} gather={best.gather} fight={best.fight} "
+                f"craft={best.craft} rooms={best.rooms} steps={best.steps}"
+            )
+            print("optimize_top10:")
+            for s in sorted(ok, key=lambda x: (x.ticks, x.move, x.steps, x.seed))[:10]:
+                print(
+                    f"  seed={s.seed:3d} ticks={s.ticks:3d} move={s.move:3d} "
+                    f"fight={s.fight:3d} rooms={s.rooms:2d} steps={s.steps:2d}"
+                )
+            config = AppConfig(
+                account=config.account,
+                sim=SimConfig(master_seed=best.seed),
+            )
+            sim = run_loadout_scenario(rules, config, loadout=loadout)
+            print()
+            print(f"loadout_seed: {best.seed}")
+        elif args.find_loadout_seed or args.seed is None:
             found = find_loadout_seed(
                 rules,
                 loadout=loadout,
