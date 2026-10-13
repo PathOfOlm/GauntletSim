@@ -76,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
         dest="show_route",
         action="store_true",
         default=None,
-        help="Print room-route + hub tile-trail panel after Phase 3.5 runs",
+        help="Write/show prep route PNG (default on for Phase 3.5; needs .[viz])",
     )
     parser.add_argument(
         "--no-show-route",
@@ -90,7 +90,12 @@ def build_parser() -> argparse.ArgumentParser:
         const="results",
         default=None,
         metavar="DIR",
-        help="Write route ASCII+SVG under DIR (default: results/)",
+        help="Directory for route PNG/HTML (default with --show-route: results/)",
+    )
+    parser.add_argument(
+        "--ascii-route",
+        action="store_true",
+        help="Also print/write the dense ASCII route panel",
     )
     return parser
 
@@ -98,22 +103,53 @@ def build_parser() -> argparse.ArgumentParser:
 def _want_show_route(args: argparse.Namespace, *, loadout: bool) -> bool:
     if args.show_route is not None:
         return bool(args.show_route)
-    # Default on for loadout; compact on for plain phase3.5 as well.
+    # Default on for Phase 3.5 / loadout runs.
     return True
 
 
-def _emit_route(sim: PrepSim, args: argparse.Namespace, *, stem: str) -> None:
+def _emit_route(
+    sim: PrepSim,
+    args: argparse.Namespace,
+    *,
+    stem: str,
+    loadout: str | None = None,
+) -> None:
+    out_dir = Path(args.write_route) if args.write_route is not None else Path("results")
+    written = write_route_artifacts(
+        out_dir,
+        sim.dungeon,
+        sim.route,
+        stem=stem,
+        loadout=loadout,
+        ascii_panel=bool(args.ascii_route),
+    )
+    pngs = [p for p in written if p.suffix.lower() == ".png"]
+    htmls = [p for p in written if p.suffix.lower() == ".html"]
     print()
-    print(sim.route_panel())
-    if args.write_route is not None:
-        out_dir = Path(args.write_route)
-        written = write_route_artifacts(
-            out_dir, sim.dungeon, sim.route, stem=stem
+    if pngs:
+        print("=" * 60)
+        print(f"ROUTE IMAGE: {pngs[0].resolve()}")
+        print("=" * 60)
+        if htmls:
+            print(f"ROUTE HTML:  {htmls[0].resolve()}")
+    else:
+        print(
+            "route PNG unavailable — install viz extras: "
+            'python -m pip install -e ".[viz]"'
         )
+        if args.ascii_route:
+            print()
+            print(sim.route_panel())
+        else:
+            # Stdlib fallback: short room path only.
+            print(f"room_path: {sim.route.room_path_string()}")
+    if args.ascii_route and pngs:
         print()
-        print("route_files:")
-        for path in written:
-            print(f"  {path}")
+        print(sim.route_panel())
+    print()
+    print("route_files:")
+    for path in written:
+        print(f"  {path}")
 
 
 def phase1_status_lines(rules: GameRules, config: AppConfig) -> list[str]:
@@ -211,6 +247,7 @@ def main(argv: list[str] | None = None) -> int:
                 sim,
                 args,
                 stem=f"loadout-{loadout}-seed{seed}",
+                loadout=loadout,
             )
         return 0 if loadout_met(sim) else 1
 

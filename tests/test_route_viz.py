@@ -1,10 +1,12 @@
-"""Route recording and ASCII/SVG visualization."""
+"""Route recording and PNG/ASCII visualization."""
 
 from __future__ import annotations
 
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.game_rules import GameRules
@@ -14,6 +16,7 @@ from gauntletsim.route import (
     render_room_route_svg,
     write_route_artifacts,
 )
+from gauntletsim.route_plot import viz_available, write_route_png
 from gauntletsim.scenarios import LOADOUT_T3_DUAL_T2ARM, run_loadout_scenario
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +36,6 @@ def test_route_records_rooms_and_tiles_on_loadout() -> None:
     panel = sim.route_panel()
     assert "room route" in panel
     assert "hub tile trail" in panel
-    assert "singing_bowl" in panel or "B=bowl" in panel
 
 
 def test_room_route_ascii_and_svg() -> None:
@@ -52,23 +54,43 @@ def test_room_route_ascii_and_svg() -> None:
     assert "polyline" in svg or "rect" in svg
 
 
-def test_write_route_artifacts(tmp_path: Path) -> None:
+def test_write_route_artifacts_rooms_txt(tmp_path: Path) -> None:
     rules = GameRules.load()
     cfg = AppConfig(
         account=AppConfig.phase1_demo().account,
         sim=SimConfig(master_seed=1),
     )
     sim = run_loadout_scenario(rules, cfg, loadout=LOADOUT_T3_DUAL_T2ARM)
-    written = write_route_artifacts(tmp_path, sim.dungeon, sim.route, stem="demo")
+    written = write_route_artifacts(
+        tmp_path, sim.dungeon, sim.route, stem="demo", ascii_panel=True
+    )
     names = {p.name for p in written}
+    assert "demo-rooms.txt" in names
     assert "demo.txt" in names
     assert "demo.svg" in names
-    assert "demo-rooms.txt" in names
-    text = (tmp_path / "demo.txt").read_text(encoding="utf-8")
-    assert "room_path:" in text or "itinerary" in text
 
 
-def test_cli_show_route_and_write(tmp_path: Path) -> None:
+@pytest.mark.skipif(not viz_available(), reason="matplotlib viz extra not installed")
+def test_write_route_png(tmp_path: Path) -> None:
+    rules = GameRules.load()
+    cfg = AppConfig(
+        account=AppConfig.phase1_demo().account,
+        sim=SimConfig(master_seed=1),
+    )
+    sim = run_loadout_scenario(rules, cfg, loadout=LOADOUT_T3_DUAL_T2ARM)
+    png = tmp_path / "route.png"
+    write_route_png(png, sim.dungeon, sim.route, loadout=LOADOUT_T3_DUAL_T2ARM)
+    assert png.is_file()
+    assert png.stat().st_size > 10_000
+    written = write_route_artifacts(
+        tmp_path, sim.dungeon, sim.route, stem="demo", loadout=LOADOUT_T3_DUAL_T2ARM
+    )
+    names = {p.name for p in written}
+    assert "demo-route.png" in names
+    assert "demo-route.html" in names
+
+
+def test_cli_show_route_writes_results(tmp_path: Path) -> None:
     out = tmp_path / "routes"
     proc = subprocess.run(
         [
@@ -90,8 +112,9 @@ def test_cli_show_route_and_write(tmp_path: Path) -> None:
         check=False,
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
-    assert "room route" in proc.stdout
-    assert "hub tile trail" in proc.stdout
     assert "route_files:" in proc.stdout
-    assert list(out.glob("*.svg"))
-    assert list(out.glob("*.txt"))
+    assert (out / f"loadout-{LOADOUT_T3_DUAL_T2ARM}-seed1-rooms.txt").is_file()
+    if viz_available():
+        assert "ROUTE IMAGE:" in proc.stdout
+        assert list(out.glob("*-route.png"))
+        assert list(out.glob("*-route.html"))

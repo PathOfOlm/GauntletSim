@@ -377,19 +377,47 @@ def write_route_artifacts(
     route: RouteRecorder,
     *,
     stem: str = "route",
+    loadout: str | None = None,
+    ascii_panel: bool = False,
 ) -> list[Path]:
-    """Write ASCII panel + SVG under out_dir. Returns written paths."""
+    """Write route artifacts under out_dir. Prefer PNG/HTML when [viz] is installed."""
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
-    panel = render_route_panel(state, route)
-    txt_path = out_dir / f"{stem}.txt"
-    txt_path.write_text(panel + "\n", encoding="utf-8")
-    written.append(txt_path)
-    svg_path = out_dir / f"{stem}.svg"
-    svg_path.write_text(render_room_route_svg(state, route) + "\n", encoding="utf-8")
-    written.append(svg_path)
-    # Compact machine-readable room path
+
+    # Human-readable PNG + HTML (optional matplotlib).
+    try:
+        from gauntletsim.route_plot import (
+            VizDependencyError,
+            write_route_html,
+            write_route_png,
+        )
+
+        png_path = out_dir / f"{stem}-route.png"
+        write_route_png(png_path, state, route, loadout=loadout)
+        written.append(png_path)
+        html_path = out_dir / f"{stem}-route.html"
+        title = (
+            f"Prep route — seed {state.layout.master_seed} · "
+            f"{state.player.tick} ticks"
+            + (f" · {loadout}" if loadout else "")
+        )
+        write_route_html(html_path, png_path, title=title)
+        written.append(html_path)
+    except VizDependencyError:
+        pass
+
+    # Always keep a compact room-path text file.
     path_file = out_dir / f"{stem}-rooms.txt"
     path_file.write_text(route.room_path_string() + "\n", encoding="utf-8")
     written.append(path_file)
+
+    # Optional dense ASCII / SVG (stdlib fallbacks).
+    if ascii_panel:
+        panel = render_route_panel(state, route)
+        txt_path = out_dir / f"{stem}.txt"
+        txt_path.write_text(panel + "\n", encoding="utf-8")
+        written.append(txt_path)
+        svg_path = out_dir / f"{stem}.svg"
+        svg_path.write_text(render_room_route_svg(state, route) + "\n", encoding="utf-8")
+        written.append(svg_path)
     return written
