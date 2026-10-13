@@ -27,6 +27,36 @@ def test_assumptions_have_id_range_and_label() -> None:
         assert item["range"] not in (None, "")
         assert "default" in item
         assert item["unit"]
+        if "research_status" in item:
+            assert item["research_status"] in {
+                "still_unknown",
+                "constrained",
+                "resolved",
+            }
+
+
+def test_promoted_assumptions_no_longer_open() -> None:
+    """Former unknowns that were verified must not remain as open assumptions."""
+    rules = GameRules.load()
+    open_ids = {a["id"] for a in rules.assumptions}
+    for resolved in (
+        "A-SHARD-QTY-CORRUPT-01",
+        "A-WEAPON-SPEED-01",
+        "A-HUB-CRAFT-TICKS-01",
+        "A-INV-START-SLOTS-01",
+        "A-FISH-ONETICK-01",
+        "A-GEN-FISH-01",
+        "A-EXPLORE-02",
+        "A-STOMP-TRIGGER-01",
+        "A-COMBAT-ACCURACY-01",
+        "A-MOB-STATS-01",
+        "A-RUN-ENERGY-01",
+        "A-PRAYER-DRAIN-01",
+    ):
+        assert resolved not in open_ids
+    # Promoted facts must exist in rules
+    assert rules.get("combat", "weapon_attack_speed_ticks")["bow_rapid"] == 4
+    assert rules.get("inventory", "starting_occupied_inventory_slots") == 5
 
 
 def test_assumption_ids_unique_and_parameters_unique() -> None:
@@ -47,6 +77,8 @@ def test_uncertainty_register_lists_core_assumption_ids() -> None:
         "A-FLOOR-DMG-01",
         "A-TORNADO-DMG-01",
         "A-DEMI-SPAWN-01",
+        "A-MOB-STATS-SCORPION-WOLF",
+        "A-GEN-NODES-01",
     ]
     for assumption_id in required_prefixes:
         assert assumption_id in text

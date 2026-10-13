@@ -10,90 +10,210 @@
     "wiki-tornado-cg": "https://oldschool.runescape.wiki/w/Tornado_(Corrupted_Gauntlet)",
     "wiki-egniol": "https://oldschool.runescape.wiki/w/Egniol_potion",
     "wiki-shards": "https://oldschool.runescape.wiki/w/Crystal_shards_(The_Gauntlet)",
-    "wiki-game-tick": "https://oldschool.runescape.wiki/w/Game_tick"
+    "wiki-game-tick": "https://oldschool.runescape.wiki/w/Game_tick",
+    "wiki-corrupted-shards": "https://oldschool.runescape.wiki/w/Corrupted_shards",
+    "wiki-corrupted-bow-perfected": "https://oldschool.runescape.wiki/w/Corrupted_bow_(perfected)",
+    "wiki-corrupted-staff-perfected": "https://oldschool.runescape.wiki/w/Corrupted_staff_(perfected)",
+    "wiki-corrupted-halberd-perfected": "https://oldschool.runescape.wiki/w/Corrupted_halberd_(perfected)",
+    "wiki-paddlefish": "https://oldschool.runescape.wiki/w/Paddlefish",
+    "wiki-strategies": "https://oldschool.runescape.wiki/w/The_Gauntlet/Strategies",
+    "wiki-crystal-sceptre": "https://oldschool.runescape.wiki/w/Crystal_sceptre",
+    "wiki-energy": "https://oldschool.runescape.wiki/w/Energy",
+    "wiki-stamina": "https://oldschool.runescape.wiki/w/Stamina_potion",
+    "wiki-prayer": "https://oldschool.runescape.wiki/w/Prayer",
+    "wiki-corrupted-rat": "https://oldschool.runescape.wiki/w/Corrupted_Rat",
+    "wiki-corrupted-bat": "https://oldschool.runescape.wiki/w/Corrupted_Bat",
+    "wiki-corrupted-spider": "https://oldschool.runescape.wiki/w/Corrupted_Spider",
+    "wiki-corrupted-unicorn": "https://oldschool.runescape.wiki/w/Corrupted_Unicorn",
+    "wiki-corrupted-bear": "https://oldschool.runescape.wiki/w/Corrupted_Bear",
+    "wiki-corrupted-dragon": "https://oldschool.runescape.wiki/w/Corrupted_Dragon",
+    "wiki-corrupted-dark-beast": "https://oldschool.runescape.wiki/w/Corrupted_Dark_Beast",
+    "wiki-corrupt-fishing-spot": "https://oldschool.runescape.wiki/w/Corrupt_Fishing_Spot"
   },
   "timing": {
     "tick_seconds": {
       "value": 0.6,
       "confidence": "verified",
-      "source_ids": ["wiki-game-tick"]
+      "source_ids": [
+        "wiki-game-tick"
+      ]
     },
     "prep_seconds": {
       "value": 450,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "prep_ticks": {
       "value": 750,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-game-tick"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-game-tick"
+      ]
     },
     "cook_paddlefish_ticks": {
       "value": 1,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "fill_vial_ticks": {
       "value": 1,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "egniol_create_ticks": {
       "value": 1,
       "confidence": "verified",
-      "source_ids": ["wiki-egniol"]
+      "source_ids": [
+        "wiki-egniol"
+      ]
+    },
+    "sing_ticks_per_item": {
+      "value": 1,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bow-perfected",
+        "wiki-corrupted-staff-perfected",
+        "wiki-corrupted-halberd-perfected"
+      ]
+    },
+    "post_vial_fish_ticks": {
+      "value": 1,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-strategies"
+      ]
+    },
+    "stamina_effect_ticks": {
+      "value": 200,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-egniol",
+        "wiki-stamina"
+      ]
+    },
+    "stamina_drain_multiplier": {
+      "value": 0.3,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-egniol",
+        "wiki-stamina",
+        "wiki-energy"
+      ]
     }
   },
   "topology": {
     "grid_width": {
       "value": 7,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "grid_height": {
       "value": 7,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "boss_room_center": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "start_adjacent_to_boss": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "ordinary_inner_ring_mitigation_applies": {
       "value": false,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "guaranteed_three_fishing_spot_room": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "nodes_per_resource_room_min": {
       "value": 0,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "nodes_per_resource_room_max": {
       "value": 5,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "cardinal_outer_rooms_guaranteed_demi_boss": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "demi_boss_attack_range_tiles": {
       "value": 10,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
+    },
+    "guaranteed_fish_room_adjacent_to_boss": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-strategies",
+        "wiki-gauntlet"
+      ]
+    },
+    "orthogonal_edges_passable_once_lit": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-crystal-sceptre",
+        "wiki-strategies"
+      ]
+    },
+    "demi_boss_edges_only": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bear",
+        "wiki-corrupted-dragon",
+        "wiki-corrupted-dark-beast",
+        "wiki-strategies"
+      ]
+    },
+    "demi_boss_spawn_alone": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bear",
+        "wiki-corrupted-dragon",
+        "wiki-corrupted-dark-beast"
+      ]
     }
   },
   "resources": {
@@ -106,64 +226,104 @@
         "fishing_spot": 4
       },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "gather_shard_quantity_min": {
       "value": 10,
-      "confidence": "strongly_supported",
-      "source_ids": ["wiki-shards"]
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-shards"
+      ]
     },
     "gather_shard_quantity_max": {
       "value": 30,
-      "confidence": "strongly_supported",
-      "source_ids": ["wiki-shards"]
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-shards"
+      ]
     },
     "gather_shard_chance_numerator": {
       "value": 1,
-      "confidence": "strongly_supported",
-      "source_ids": ["wiki-shards"]
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-shards"
+      ]
     },
     "gather_shard_chance_denominator": {
       "value": 3,
-      "confidence": "strongly_supported",
-      "source_ids": ["wiki-shards"]
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-shards"
+      ]
     },
     "cooked_paddlefish_heal": {
       "value": 20,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "crystal_paddlefish_heal": {
       "value": 16,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "ore_bark_linum_stackable": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "shards_auto_inventory": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
+    },
+    "paddlefish_stop_burn_cooking_level": {
+      "value": 47,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-paddlefish"
+      ]
+    },
+    "fishing_catch_always_succeeds": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupt-fishing-spot"
+      ]
     }
   },
   "crafting": {
     "weapon_basic_shards": {
       "value": 0,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-shards"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-shards"
+      ]
     },
     "weapon_attuned_shards": {
       "value": 50,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-shards"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-shards"
+      ]
     },
     "weapon_basic_requires_frame": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "armour_shards": {
       "value": {
@@ -174,85 +334,159 @@
         "perfected_any": 100
       },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-shards"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-shards"
+      ]
     },
     "armour_materials": {
       "value": {
-        "basic_any": {"ore": 1, "bark": 1, "linum": 1},
-        "attuned_body": {"ore": 2, "bark": 2, "linum": 2},
-        "attuned_helm": {"ore": 1, "bark": 1, "linum": 1},
-        "attuned_legs": {"ore": 1, "bark": 1, "linum": 1},
-        "perfected_any": {"ore": 2, "bark": 2, "linum": 2}
+        "basic_any": {
+          "ore": 1,
+          "bark": 1,
+          "linum": 1
+        },
+        "attuned_body": {
+          "ore": 2,
+          "bark": 2,
+          "linum": 2
+        },
+        "attuned_helm": {
+          "ore": 1,
+          "bark": 1,
+          "linum": 1
+        },
+        "attuned_legs": {
+          "ore": 1,
+          "bark": 1,
+          "linum": 1
+        },
+        "perfected_any": {
+          "ore": 2,
+          "bark": 2,
+          "linum": 2
+        }
       },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-shards"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-shards"
+      ]
     },
     "vial_shards": {
       "value": 10,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
     },
     "teleport_crystal_shards": {
       "value": 50,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
     },
     "escape_crystal_shards": {
       "value": 200,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
     },
     "crystal_paddlefish_shards": {
       "value": 10,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
     },
     "egniol_dust_shards": {
       "value": 10,
       "confidence": "verified",
-      "source_ids": ["wiki-egniol", "wiki-shards"]
+      "source_ids": [
+        "wiki-egniol",
+        "wiki-shards"
+      ]
     },
     "crush_t3_component_shards": {
       "value": 80,
       "confidence": "verified",
-      "source_ids": ["wiki-shards"]
+      "source_ids": [
+        "wiki-shards"
+      ]
     },
     "egniol_run_energy_percent": {
       "value": 40,
       "confidence": "verified",
-      "source_ids": ["wiki-egniol"]
+      "source_ids": [
+        "wiki-egniol"
+      ]
     },
     "egniol_prayer_restore_divisor": {
       "value": 4,
       "confidence": "verified",
-      "source_ids": ["wiki-egniol"]
+      "source_ids": [
+        "wiki-egniol"
+      ]
     },
     "egniol_prayer_restore_flat": {
       "value": 7,
       "confidence": "verified",
-      "source_ids": ["wiki-egniol"]
+      "source_ids": [
+        "wiki-egniol"
+      ]
+    },
+    "sing_ticks_per_item": {
+      "value": 1,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bow-perfected",
+        "wiki-corrupted-staff-perfected",
+        "wiki-corrupted-halberd-perfected"
+      ]
     }
   },
   "enemies": {
     "weak_types": {
-      "value": ["spider", "rat", "bat"],
+      "value": [
+        "spider",
+        "rat",
+        "bat"
+      ],
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "strong_types": {
-      "value": ["unicorn", "scorpion", "wolf"],
+      "value": [
+        "unicorn",
+        "scorpion",
+        "wolf"
+      ],
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "demi_boss_types": {
-      "value": ["bear", "dragon", "dark_beast"],
+      "value": [
+        "bear",
+        "dragon",
+        "dark_beast"
+      ],
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "first_weak_guarantees_weapon_frame": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "demi_boss_t3_component": {
       "value": {
@@ -261,98 +495,258 @@
         "dark_beast": "bowstring"
       },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "monster_shard_qty": {
       "value": {
-        "weak": {"min": 20, "max": 30},
-        "strong": {"min": 80, "max": 100},
-        "demi_boss": {"min": 50, "max": 60}
+        "weak": {
+          "min": 20,
+          "max": 30
+        },
+        "strong": {
+          "min": 80,
+          "max": 100
+        },
+        "demi_boss": {
+          "min": 50,
+          "max": 60
+        }
       },
-      "confidence": "strongly_supported",
-      "source_ids": ["wiki-shards"]
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-shards"
+      ]
+    },
+    "weak_max_per_room": {
+      "value": 3,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bat",
+        "wiki-corrupted-rat",
+        "wiki-corrupted-spider"
+      ]
+    },
+    "strong_spawn_in_pairs": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-unicorn"
+      ]
+    },
+    "combat_stats": {
+      "value": {
+        "rat": {
+          "combat_level": 33,
+          "hitpoints": 12,
+          "attack": 42,
+          "strength": 48,
+          "defence": 4,
+          "magic": 6,
+          "ranged": 0,
+          "max_hit": 14,
+          "attack_speed_ticks": 4,
+          "style": "crush"
+        },
+        "spider": {
+          "combat_level": 32,
+          "hitpoints": 12,
+          "attack": 48,
+          "strength": 39,
+          "defence": 4,
+          "magic": 4,
+          "ranged": 0,
+          "max_hit": 5,
+          "attack_speed_ticks": 4,
+          "style": "stab"
+        },
+        "bat": {
+          "combat_level": 48,
+          "hitpoints": 12,
+          "attack": 36,
+          "strength": 102,
+          "defence": 4,
+          "magic": 2,
+          "ranged": 0,
+          "max_hit": 11,
+          "attack_speed_ticks": 4,
+          "style": "slash"
+        },
+        "unicorn": {
+          "combat_level": 61,
+          "hitpoints": 38,
+          "attack": 75,
+          "strength": 72,
+          "defence": 18,
+          "magic": 24,
+          "ranged": 0,
+          "max_hit": 17,
+          "attack_speed_ticks": 4,
+          "style": "stab"
+        },
+        "bear": {
+          "combat_level": 258,
+          "hitpoints": 100,
+          "attack": 147,
+          "strength": 147,
+          "defence": 98,
+          "magic": 98,
+          "ranged": 147,
+          "max_hit": 48,
+          "attack_speed_ticks": 4,
+          "style": "slash"
+        },
+        "dragon": {
+          "combat_level": 258,
+          "hitpoints": 100,
+          "attack": 147,
+          "strength": 147,
+          "defence": 98,
+          "magic": 98,
+          "ranged": 147,
+          "max_hit": 48,
+          "attack_speed_ticks": 4,
+          "style": "magic"
+        },
+        "dark_beast": {
+          "combat_level": 258,
+          "hitpoints": 100,
+          "attack": 147,
+          "strength": 147,
+          "defence": 98,
+          "magic": 98,
+          "ranged": 147,
+          "max_hit": 48,
+          "attack_speed_ticks": 4,
+          "style": "ranged"
+        }
+      },
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-rat",
+        "wiki-corrupted-spider",
+        "wiki-corrupted-bat",
+        "wiki-corrupted-unicorn",
+        "wiki-corrupted-bear",
+        "wiki-corrupted-dragon",
+        "wiki-corrupted-dark-beast"
+      ]
     }
   },
   "boss": {
     "name": {
       "value": "Corrupted Hunllef",
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "combat_level": {
       "value": 894,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "size_tiles": {
       "value": 5,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "hitpoints": {
       "value": 1000,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "attack": {
       "value": 240,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "strength": {
       "value": 240,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "defence": {
       "value": 240,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "magic": {
       "value": 240,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "ranged": {
       "value": 240,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "attack_speed_ticks": {
       "value": 5,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "first_attack_style": {
       "value": "ranged",
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "attacks_per_style_switch": {
       "value": 4,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "player_hits_per_prayer_switch": {
       "value": 6,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "stomp_max_hit": {
       "value": 68,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "stomp_counts_toward_style_cycle": {
       "value": false,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "tornado_duration_ticks": {
       "value": 20,
       "confidence": "verified",
-      "source_ids": ["wiki-tornado-cg", "wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-tornado-cg",
+        "wiki-corrupted-hunllef"
+      ]
     },
     "tornado_count_by_hp_ratio": {
       "value": {
@@ -361,7 +755,9 @@
         "below_33_percent": 4
       },
       "confidence": "verified",
-      "source_ids": ["wiki-tornado-cg"]
+      "source_ids": [
+        "wiki-tornado-cg"
+      ]
     },
     "floor_phase_hp": {
       "value": {
@@ -370,7 +766,9 @@
         "phase3_max_inclusive": 332
       },
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "prayed_max_hit_by_tier_sum": {
       "value": {
@@ -380,7 +778,10 @@
         "9": 8
       },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet", "wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-corrupted-hunllef"
+      ]
     },
     "unprayed_max_hit_by_full_set": {
       "value": {
@@ -390,46 +791,200 @@
         "t3": 35
       },
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
     },
     "tornado_damage_tornado_page": {
       "value": {
-        "none": {"min": 15, "max": 30},
-        "t1": {"min": 14, "max": 25},
-        "t2": {"min": 10, "max": 20},
-        "t3": {"min": 8, "max": 15}
+        "none": {
+          "min": 15,
+          "max": 30
+        },
+        "t1": {
+          "min": 14,
+          "max": 25
+        },
+        "t2": {
+          "min": 10,
+          "max": 20
+        },
+        "t3": {
+          "min": 8,
+          "max": 15
+        }
       },
       "confidence": "strongly_supported",
-      "source_ids": ["wiki-tornado-cg"]
+      "source_ids": [
+        "wiki-tornado-cg"
+      ]
     },
     "shared_mechanics_with_crystalline": {
       "value": true,
       "confidence": "verified",
-      "source_ids": ["wiki-corrupted-hunllef"]
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
+    },
+    "stomp_trigger": {
+      "value": "on_attack_tick",
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
+    },
+    "tornado_damage_canonical": {
+      "value": "tornado_page",
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-tornado-cg"
+      ]
+    },
+    "floor_damage_wiki_stated_min": {
+      "value": 10,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-corrupted-hunllef",
+        "wiki-strategies"
+      ]
+    },
+    "floor_damage_wiki_stated_max_unconfirmed": {
+      "value": 20,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-corrupted-hunllef"
+      ]
+    },
+    "last_phase_some_tiles_never_orange": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-strategies"
+      ]
     }
   },
   "inventory": {
     "capacity_slots": {
       "value": 28,
       "confidence": "strongly_supported",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "starting_items": {
-      "value": [
-        "sceptre",
-        "axe",
-        "pickaxe",
-        "harpoon",
-        "pestle_and_mortar",
-        "teleport_crystal"
-      ],
+      "value": {
+        "wielded": [
+          "sceptre"
+        ],
+        "inventory": [
+          "axe",
+          "pickaxe",
+          "harpoon",
+          "pestle_and_mortar",
+          "teleport_crystal"
+        ]
+      },
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
     },
     "external_items_allowed": {
       "value": false,
       "confidence": "verified",
-      "source_ids": ["wiki-gauntlet"]
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
+    },
+    "starting_occupied_inventory_slots": {
+      "value": 5,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-gauntlet"
+      ]
+    }
+  },
+  "combat": {
+    "use_standard_osrs_hit_formulas": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-corrupted-bow-perfected",
+        "wiki-corrupted-halberd-perfected"
+      ]
+    },
+    "weapon_attack_speed_ticks": {
+      "value": {
+        "bow_accurate": 5,
+        "bow_rapid": 4,
+        "bow_longrange": 5,
+        "staff_accurate": 4,
+        "halberd": 4
+      },
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-bow-perfected",
+        "wiki-corrupted-staff-perfected",
+        "wiki-corrupted-halberd-perfected"
+      ]
+    },
+    "perfected_staff_max_hit": {
+      "value": 39,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-staff-perfected"
+      ]
+    },
+    "perfected_staff_max_hit_with_augury_or_mystic_vigour": {
+      "value": 40,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-corrupted-staff-perfected"
+      ]
+    }
+  },
+  "player": {
+    "prayer_drain_effect_protect": {
+      "value": 12,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-prayer"
+      ]
+    },
+    "prayer_drain_effect_rigour": {
+      "value": 24,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-prayer"
+      ]
+    },
+    "prayer_drain_effect_augury": {
+      "value": 24,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-prayer"
+      ]
+    },
+    "prayer_drain_effect_piety": {
+      "value": 24,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-prayer"
+      ]
+    },
+    "egniol_acts_as_stamina": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-egniol"
+      ]
+    },
+    "run_energy_uses_standard_osrs_formula": {
+      "value": true,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "wiki-energy"
+      ]
     }
   }
 }

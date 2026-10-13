@@ -15,6 +15,12 @@
 | `wiki-shards` | https://oldschool.runescape.wiki/w/Crystal_shards_(The_Gauntlet) |
 | `wiki-game-tick` | https://oldschool.runescape.wiki/w/Game_tick |
 | `wiki-strategies` | https://oldschool.runescape.wiki/w/The_Gauntlet/Strategies |
+| `wiki-corrupted-shards` | https://oldschool.runescape.wiki/w/Corrupted_shards |
+| `wiki-paddlefish` | https://oldschool.runescape.wiki/w/Paddlefish |
+| `wiki-energy` | https://oldschool.runescape.wiki/w/Energy |
+| `wiki-stamina` | https://oldschool.runescape.wiki/w/Stamina_potion |
+| `wiki-prayer` | https://oldschool.runescape.wiki/w/Prayer |
+| `wiki-crystal-sceptre` | https://oldschool.runescape.wiki/w/Crystal_sceptre |
 
 ---
 
@@ -264,9 +270,9 @@
 
 | Field | Value |
 |-------|-------|
-| Statement | Player starts with corrupted/crystal sceptre (wielded), axe, pickaxe, harpoon, pestle and mortar, and one teleport crystal. Tool storage can re-obtain tools. |
+| Statement | Player starts **wielding** the sceptre; inventory starts with axe, pickaxe, harpoon, pestle and mortar, and one teleport crystal (5 slots). Tool storage can re-obtain tools. |
 | Source | https://oldschool.runescape.wiki/w/The_Gauntlet |
-| Confidence | `verified` (crystal names; Corrupted equivalents `strongly_supported`) |
+| Confidence | `verified` |
 | Intended module | `inventory` / `player` |
 | Test id | `test_rules_starting_items` |
 
@@ -430,8 +436,113 @@
 
 ---
 
+## 9. Unknowns research promotions (post Phase 1 scaffold)
+
+### R-TOPO-05 — Orthogonal connectivity once lit
+
+| Field | Value |
+|-------|-------|
+| Statement | Adjacent rooms are reached by lighting doorway nodes with the sceptre; the 7×7 grid is treated as fully orthogonally connected once rooms are lit (no evidence of permanently blocked adjacent edges). |
+| Source | https://oldschool.runescape.wiki/w/Crystal_sceptre ; https://oldschool.runescape.wiki/w/The_Gauntlet/Strategies |
+| Confidence | `strongly_supported` |
+| Intended module | `dungeon` |
+| Test id | `test_rules_orthogonal_edges` |
+
+### R-TOPO-06 — Guaranteed fish room location
+
+| Field | Value |
+|-------|-------|
+| Statement | In Corrupted Gauntlet, one room **adjacent to the Hunllef** is guaranteed to have at least three fishing spots (12 paddlefish). |
+| Source | https://oldschool.runescape.wiki/w/The_Gauntlet/Strategies (Corrupted section) |
+| Confidence | `strongly_supported` |
+| Intended module | `dungeon` |
+| Test id | `test_rules_fish_room_adjacent` |
+
+### R-RES-07 — Corrupted shard quantities
+
+| Field | Value |
+|-------|-------|
+| Statement | Corrupted monster always-drops: weak 20–30; strong 80–100; demi-boss 50–60. Gathering nodes: 10–30 at 1/3. Confirmed on Corrupted shards page (not borrowed from crystalline-only tables). |
+| Source | https://oldschool.runescape.wiki/w/Corrupted_shards |
+| Confidence | `verified` |
+| Intended module | `resources` / `combat` |
+| Test id | `test_rules_corrupted_shard_qty` |
+
+### R-RES-08 — Paddlefish burn stop level
+
+| Field | Value |
+|-------|-------|
+| Statement | Paddlefish can burn; stop burning at Cooking level 47. Burn rate below 47 remains unknown (`A-COOK-BURN-01`). |
+| Source | https://oldschool.runescape.wiki/w/Paddlefish |
+| Confidence | `verified` |
+| Intended module | `crafting` |
+| Test id | `test_rules_paddlefish_stop_burn` |
+
+### R-MOB-05 — Corrupted mob combat stats (partial)
+
+| Field | Value |
+|-------|-------|
+| Statement | Exact wiki stats ingested for Corrupted rat, spider, bat, unicorn, bear, dragon, dark beast. Weak rooms spawn up to 3; mid-level always spawn in pairs; demi-bosses spawn alone on map edges. Scorpion/wolf stats still pending (`A-MOB-STATS-SCORPION-WOLF`). |
+| Source | Corrupted monster wiki pages (see `data/rules` source ids) |
+| Confidence | `verified` (listed mobs); scorpion/wolf `unknown` |
+| Intended module | `combat` / `dungeon` |
+| Test id | `test_rules_corrupted_mob_stats` |
+
+### R-CRAFT-06 — Singing bowl craft ticks
+
+| Field | Value |
+|-------|-------|
+| Statement | Creating/upgrading corrupted weapons at the singing bowl takes 1 tick (0.6 s). |
+| Source | https://oldschool.runescape.wiki/w/Corrupted_bow_(perfected) (and staff/halberd perfected) |
+| Confidence | `verified` |
+| Intended module | `crafting` |
+| Test id | `test_rules_sing_ticks` |
+
+### R-COMBAT-01 — Weapon attack speeds
+
+| Field | Value |
+|-------|-------|
+| Statement | Corrupted bow: Accurate/Longrange 5 ticks, Rapid 4 ticks. Corrupted staff Accurate: 4 ticks. Corrupted halberd: 4 ticks (unlike normal halberds at 7). Perfected staff max hit 39 (40 with Augury/Mystic Vigour), independent of Magic level. |
+| Source | Corrupted weapon wiki pages |
+| Confidence | `verified` |
+| Intended module | `combat` |
+| Test id | `test_rules_weapon_speeds` |
+
+### R-INV-04 — Starting slot accounting
+
+| Field | Value |
+|-------|-------|
+| Statement | Player starts **wielding** the sceptre; inventory starts with axe, pickaxe, harpoon, pestle and mortar, teleport crystal → **5** occupied inventory slots. |
+| Source | https://oldschool.runescape.wiki/w/The_Gauntlet |
+| Confidence | `verified` |
+| Intended module | `inventory` |
+| Test id | `test_rules_starting_slots` |
+
+### R-PLAYER-01 — Egniol stamina + run/prayer drain
+
+| Field | Value |
+|-------|-------|
+| Statement | Egniol “acts as a stamina potion” → 70% run-drain reduction for 2 minutes (200 ticks) under standard Energy rules; egniol restores 40% run (not stamina’s 20%). Prayer drain effects: Protect 12; Rigour/Augury/Piety 24 (standard Prayer wiki). Corrupted armour prayer bonus is 0 on wiki gear tables. |
+| Source | https://oldschool.runescape.wiki/w/Egniol_potion ; https://oldschool.runescape.wiki/w/Stamina_potion ; https://oldschool.runescape.wiki/w/Energy ; https://oldschool.runescape.wiki/w/Prayer |
+| Confidence | `verified` (egniol acts as stamina; prayer drain effects); `strongly_supported` (stamina duration/multiplier apply inside Gauntlet) |
+| Intended module | `player` |
+| Test id | `test_rules_egniol_stamina_prayer` |
+
+### R-BOSS-13 — Stomp trigger wording
+
+| Field | Value |
+|-------|-------|
+| Statement | Stomp occurs if the player is underneath when Hunllef **tries to attack** → model as `on_attack_tick`, not continuous overlap. |
+| Source | https://oldschool.runescape.wiki/w/Corrupted_Hunllef |
+| Confidence | `strongly_supported` |
+| Intended module | `boss` |
+| Test id | `test_rules_stomp_trigger` |
+
+---
+
 ## Cross-cutting notes
 
 - Prefer `unknown` + assumption id over inventing exact generation probabilities, gather tick rates, or prayer-disable rates.
 - Ordinary Gauntlet inner-ring mitigation must **not** be applied to Corrupted simulations.
 - July 22 2026 update materially changed shard ranges, crafting costs, demi-boss spawns, and stackability — Phase 1 rules reflect post-update wiki text.
+- Tornado damage: prefer `Tornado_(Corrupted_Gauntlet)` page as canonical; Hunllef page has small T1/T3 conflicts (`A-TORNADO-DMG-01`).

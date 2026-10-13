@@ -23,6 +23,8 @@ RULES_ALLOWED_TOP_KEYS = frozenset(
         "enemies",
         "boss",
         "inventory",
+        "combat",
+        "player",
     }
 )
 
@@ -35,7 +37,9 @@ ASSUMPTIONS_ALLOWED_TOP_KEYS = frozenset({"meta", "assumptions"})
 ASSUMPTION_ENTRY_REQUIRED = frozenset(
     {"id", "label", "parameter", "default", "range", "unit"}
 )
-ASSUMPTION_ENTRY_ALLOWED = ASSUMPTION_ENTRY_REQUIRED
+ASSUMPTION_ENTRY_ALLOWED = ASSUMPTION_ENTRY_REQUIRED | frozenset(
+    {"research_status"}
+)
 
 
 class RulesLoadError(ValueError):
@@ -122,6 +126,8 @@ def validate_rules_document(data: Mapping[str, Any]) -> dict[str, Any]:
         "enemies",
         "boss",
         "inventory",
+        "combat",
+        "player",
     ):
         section = _require_mapping(data[name], name)
         sections[name] = _validate_rules_section(section, name)
@@ -249,6 +255,8 @@ class GameRules:
             "enemies",
             "boss",
             "inventory",
+            "combat",
+            "player",
         ):
             count += len(self.section(name))
         return count

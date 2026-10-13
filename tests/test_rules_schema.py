@@ -38,6 +38,8 @@ def test_rules_schema_required_sections_and_fields() -> None:
         "enemies",
         "boss",
         "inventory",
+        "combat",
+        "player",
     ):
         assert section in validated
         assert validated[section]
@@ -107,3 +109,71 @@ def test_rules_weapon_costs() -> None:
     rules = GameRules.load()
     assert rules.get("crafting", "weapon_basic_shards") == 0
     assert rules.get("crafting", "weapon_attuned_shards") == 50
+
+
+def test_rules_orthogonal_edges() -> None:
+    rules = GameRules.load()
+    assert rules.get("topology", "orthogonal_edges_passable_once_lit") is True
+
+
+def test_rules_fish_room_adjacent() -> None:
+    rules = GameRules.load()
+    assert rules.get("topology", "guaranteed_fish_room_adjacent_to_boss") is True
+
+
+def test_rules_corrupted_shard_qty() -> None:
+    rules = GameRules.load()
+    qty = rules.get("enemies", "monster_shard_qty")
+    assert qty["weak"] == {"min": 20, "max": 30}
+    assert qty["strong"] == {"min": 80, "max": 100}
+    assert qty["demi_boss"] == {"min": 50, "max": 60}
+
+
+def test_rules_paddlefish_stop_burn() -> None:
+    rules = GameRules.load()
+    assert rules.get("resources", "paddlefish_stop_burn_cooking_level") == 47
+
+
+def test_rules_corrupted_mob_stats() -> None:
+    rules = GameRules.load()
+    stats = rules.get("enemies", "combat_stats")
+    assert stats["dark_beast"]["hitpoints"] == 100
+    assert stats["bat"]["combat_level"] == 48
+    assert rules.get("enemies", "weak_max_per_room") == 3
+    assert rules.get("enemies", "strong_spawn_in_pairs") is True
+
+
+def test_rules_sing_ticks() -> None:
+    rules = GameRules.load()
+    assert rules.get("crafting", "sing_ticks_per_item") == 1
+
+
+def test_rules_weapon_speeds() -> None:
+    rules = GameRules.load()
+    speeds = rules.get("combat", "weapon_attack_speed_ticks")
+    assert speeds["bow_rapid"] == 4
+    assert speeds["bow_accurate"] == 5
+    assert speeds["staff_accurate"] == 4
+    assert speeds["halberd"] == 4
+    assert rules.get("combat", "perfected_staff_max_hit") == 39
+
+
+def test_rules_starting_slots() -> None:
+    rules = GameRules.load()
+    assert rules.get("inventory", "starting_occupied_inventory_slots") == 5
+    starters = rules.get("inventory", "starting_items")
+    assert starters["wielded"] == ["sceptre"]
+    assert len(starters["inventory"]) == 5
+
+
+def test_rules_egniol_stamina_prayer() -> None:
+    rules = GameRules.load()
+    assert rules.get("player", "egniol_acts_as_stamina") is True
+    assert rules.get("timing", "stamina_effect_ticks") == 200
+    assert rules.get("player", "prayer_drain_effect_protect") == 12
+    assert rules.get("player", "prayer_drain_effect_rigour") == 24
+
+
+def test_rules_stomp_trigger() -> None:
+    rules = GameRules.load()
+    assert rules.get("boss", "stomp_trigger") == "on_attack_tick"
