@@ -32,7 +32,8 @@
     "wiki-corrupted-scorpion": "https://oldschool.runescape.wiki/w/Corrupted_Scorpion",
     "wiki-corrupted-wolf": "https://oldschool.runescape.wiki/w/Corrupted_Wolf",
     "wiki-corrupt-deposit": "https://oldschool.runescape.wiki/w/Corrupt_Deposit",
-    "jagex-summer-sweep-2026": "https://secure.runescape.com/m=news/summer-sweep-up-gear--pvm-changes?oldschool=1"
+    "jagex-summer-sweep-2026": "https://secure.runescape.com/m=news/summer-sweep-up-gear--pvm-changes?oldschool=1",
+    "user-play-experience": "user-confirmed (GauntletSim Phase 1 Q&A)"
   },
   "timing": {
     "tick_seconds": {
@@ -332,6 +333,13 @@
       "confidence": "verified",
       "source_ids": [
         "wiki-corrupt-deposit"
+      ]
+    },
+    "gather_interval_ticks": {
+      "value": 3,
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "user-play-experience"
       ]
     }
   },
@@ -934,6 +942,14 @@
       "confidence": "strongly_supported",
       "source_ids": [
         "wiki-strategies"
+      ]
+    },
+    "prayer_disable_model": {
+      "value": "once_per_mage_cycle",
+      "confidence": "strongly_supported",
+      "source_ids": [
+        "user-play-experience",
+        "wiki-corrupted-hunllef"
       ]
     }
   },

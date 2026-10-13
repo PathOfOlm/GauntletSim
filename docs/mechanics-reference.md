@@ -508,6 +508,26 @@
 | Intended module | `dungeon` / `player` |
 | Test id | `test_rules_room_light_ticks` |
 
+### R-RES-09 — Gather interval
+
+| Field | Value |
+|-------|-------|
+| Statement | Resource gather rolls in Corrupted Gauntlet are approximately **every 3 ticks**. Exact wiki confirmation lacking; user play experience. Sensitivity band 2–4 ticks remains as `A-GATHER-TICKS-01`. |
+| Source | User confirmation |
+| Confidence | `strongly_supported` |
+| Intended module | `resources` |
+| Test id | `test_rules_gather_interval` |
+
+### R-BOSS-14 — Prayer-disable model
+
+| Field | Value |
+|-------|-------|
+| Statement | During each Hunllef **mage cycle** (4 attacks), model prayer-disable as occurring **once** with probability ~**80%** (user). Wiki only states a chance on magic attacks with no rate. Probability is assumption `A-PRAYER-DISABLE-01`. |
+| Source | User confirmation; https://oldschool.runescape.wiki/w/Corrupted_Hunllef |
+| Confidence | `strongly_supported` (model shape); rate `constrained` assumption |
+| Intended module | `boss` |
+| Test id | `test_rules_prayer_disable_model` |
+
 ### R-CRAFT-06 — Singing bowl craft ticks
 
 | Field | Value |

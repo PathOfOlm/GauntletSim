@@ -196,3 +196,16 @@ def test_rules_scorpion_wolf_stats() -> None:
     assert stats["scorpion"]["combat_level"] == 89
     assert stats["wolf"]["combat_level"] == 97
     assert stats["wolf"]["hitpoints"] == 38
+
+
+def test_rules_gather_interval() -> None:
+    rules = GameRules.load()
+    assert rules.get("resources", "gather_interval_ticks") == 3
+
+
+def test_rules_prayer_disable_model() -> None:
+    rules = GameRules.load()
+    assert rules.get("boss", "prayer_disable_model") == "once_per_mage_cycle"
+    prayer = rules.assumption_by_id("A-PRAYER-DISABLE-01")
+    assert prayer["default"] == 0.8
+    assert prayer["parameter"] == "boss.prayer_disable_once_per_mage_cycle_chance"

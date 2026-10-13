@@ -33,12 +33,12 @@
     },
     {
       "id": "A-GATHER-TICKS-01",
-      "label": "Ticks between gather rolls in Gauntlet (ore/fish Always succeed; interval not on wiki)",
-      "parameter": "resources.gather_interval_ticks",
+      "label": "Sensitivity band around user-confirmed ~3-tick gather interval (canonical default in rules)",
+      "parameter": "resources.gather_interval_ticks_sensitivity",
       "default": 3,
-      "range": {"min": 2, "max": 5},
+      "range": {"min": 2, "max": 4},
       "unit": "ticks",
-      "research_status": "still_unknown"
+      "research_status": "constrained"
     },
     {
       "id": "A-GATHER-SUCCESS-01",
@@ -51,12 +51,12 @@
     },
     {
       "id": "A-PRAYER-DISABLE-01",
-      "label": "Chance a magic-style Hunllef attack disables prayers (wiki: chance only; no rate)",
-      "parameter": "boss.prayer_disable_chance",
-      "default": 0.15,
-      "range": {"min": 0.05, "max": 0.35},
+      "label": "Chance Hunllef uses prayer-disable exactly once during a mage cycle (user ~80%; wiki has no rate)",
+      "parameter": "boss.prayer_disable_once_per_mage_cycle_chance",
+      "default": 0.8,
+      "range": {"min": 0.6, "max": 0.95},
       "unit": "probability",
-      "research_status": "still_unknown"
+      "research_status": "constrained"
     },
     {
       "id": "A-FLOOR-DMG-01",
