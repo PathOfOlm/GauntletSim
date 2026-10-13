@@ -1,4 +1,4 @@
-"""CLI entry: Phase 1 status + Phase 2 dungeon demo."""
+"""CLI entry: Phase 1 status, Phase 2 map, Phase 3 prep demo."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 from gauntletsim import __version__
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.game_rules import DEFAULT_ASSUMPTIONS_PATH, DEFAULT_RULES_PATH, GameRules
+from gauntletsim.prep import PrepSim
 from gauntletsim.simulation import Phase2Sim
 
 
@@ -17,33 +18,23 @@ def build_parser() -> argparse.ArgumentParser:
         prog="gauntletsim",
         description="GauntletSim — Corrupted Gauntlet offline simulator",
     )
-    parser.add_argument(
-        "--rules",
-        type=Path,
-        default=DEFAULT_RULES_PATH,
-        help="Path to corrupted_gauntlet.json",
-    )
-    parser.add_argument(
-        "--assumptions",
-        type=Path,
-        default=DEFAULT_ASSUMPTIONS_PATH,
-        help="Path to assumptions defaults.json",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=None,
-        help="Master seed (default: config demo seed)",
-    )
+    parser.add_argument("--rules", type=Path, default=DEFAULT_RULES_PATH)
+    parser.add_argument("--assumptions", type=Path, default=DEFAULT_ASSUMPTIONS_PATH)
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument(
         "--phase2",
         action="store_true",
-        help="Generate dungeon, print ASCII map (Phase 2)",
+        help="Generate dungeon, print ASCII map",
     )
     parser.add_argument(
         "--explore-fish",
         action="store_true",
         help="With --phase2, explore toward the guaranteed fish room",
+    )
+    parser.add_argument(
+        "--phase3",
+        action="store_true",
+        help="Run Phase 3 prep demo slice (gather/craft path)",
     )
     return parser
 
@@ -82,18 +73,25 @@ def main(argv: list[str] | None = None) -> int:
     if args.seed is not None:
         config = AppConfig(
             account=config.account,
-            sim=SimConfig(
-                master_seed=args.seed,
-                prep_ticks=config.sim.prep_ticks,
-                log_level=config.sim.log_level,
-                mode=config.sim.mode,
-            ),
+            sim=SimConfig(master_seed=args.seed),
         )
 
     for line in phase1_status_lines(rules, config):
         print(line)
 
-    if args.phase2:
+    if args.phase3:
+        sim = PrepSim.create(rules, config)
+        sim.demo_prep_slice()
+        print()
+        for line in sim.status_lines():
+            print(line)
+        print()
+        print("--- prep log ---")
+        for line in sim.log:
+            print(line)
+        print()
+        print(sim.ascii_map())
+    elif args.phase2:
         sim = Phase2Sim.create(rules, config)
         print()
         for line in sim.status_lines():
@@ -104,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print(sim.ascii_map())
     else:
-        print("phase2: pass --phase2 to generate dungeon ASCII map")
+        print("hint: --phase2 for map, --phase3 for prep demo")
 
     return 0
 

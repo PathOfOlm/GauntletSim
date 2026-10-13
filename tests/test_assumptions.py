@@ -85,6 +85,7 @@ def test_uncertainty_register_lists_core_assumption_ids() -> None:
         "A-DEMI-SPAWN-01",
         "A-GEN-NODES-01",
         "A-MOB-SPAWN-01",
+        "A-PREP-KILL-DEMI",
     ]
     for assumption_id in required_prefixes:
         assert assumption_id in text

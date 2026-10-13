@@ -31,6 +31,9 @@ Open assumptions after user answers + wiki recheck. Defaults in `data/assumption
 | `A-TORNADO-DMG-01` | constrained | Hunllef vs Tornado page T1/T3 deltas | `boss.tornado_damage_hunllef_page_delta` | ignore vs swap |
 | `A-TORNADO-MOVE-01` | still_unknown | Tornado pathing/speed/spawns | `boss.tornado_move_tiles_per_tick` | 1–2 |
 | `A-COOK-BURN-01` | still_unknown | Burn rate below Cooking 47 | `crafting.paddlefish_burn_probability_below_47` | 0–0.2 |
+| `A-PREP-KILL-WEAK` | still_unknown | Prep weak-room clear ticks (no full combat) | `combat.prep_weak_kill_ticks` | 4–20 (default 8) |
+| `A-PREP-KILL-STRONG` | still_unknown | Prep strong-room clear ticks | `combat.prep_strong_kill_ticks` | 8–40 (default 16) |
+| `A-PREP-KILL-DEMI` | still_unknown | Prep demi-boss kill ticks | `combat.prep_demi_kill_ticks` | 20–80 (default 40) |
 
 ## Wiki check notes (items user asked to verify)
 

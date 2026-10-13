@@ -2,7 +2,7 @@
 
 Offline, stdlib-first Python simulator for the **Corrupted Gauntlet** (Old School RuneScape). No LLMs, RL, or GPU dependencies.
 
-**Phase 2 (current):** Phase 1 rules/config plus seeded 7×7 dungeon generation, exploration movement, and ASCII map (`--phase2`). Crafting/combat/Hunllef arrive later.
+**Phase 3 (current):** Prep mechanics on the Phase 2 dungeon — gather/deplete, inventory, crafting, demi drops, 7:30 timer (`--phase3`). Hunllef fight / agents later.
 
 ## Requirements
 
@@ -47,6 +47,7 @@ Phase 2 dungeon + ASCII map:
 ```bash
 python -m gauntletsim.main --phase2 --seed 1
 python -m gauntletsim.main --phase2 --seed 1 --explore-fish
+python -m gauntletsim.main --phase3 --seed 42
 ```
 
 ## Tests

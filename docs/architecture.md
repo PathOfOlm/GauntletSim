@@ -12,7 +12,7 @@ Phase 1 delivers research, machine-readable rules/assumptions, config, and a CLI
 | `data/assumptions/defaults.json` | Labeled defaults + ranges | 1 |
 | `gauntletsim/game_rules.py` | Load/validate JSON; typed accessors | 1 |
 | `gauntletsim/config.py` | Account profile + sim parameters | 1 |
-| `gauntletsim/main.py` | CLI: status + `--phase2` dungeon ASCII | 1–2 |
+| `gauntletsim/main.py` | CLI: status, `--phase2` map, `--phase3` prep | 1–3 |
 | `gauntletsim/room.py` | Coord, Room, kinds, node/mob enums | 2 |
 | `gauntletsim/map_generator.py` | Seeded 7×7 layout (fish, demis, nodes) | 2 |
 | `gauntletsim/pathfinding.py` | BFS on discovered rooms | 2 |
@@ -21,9 +21,11 @@ Phase 1 delivers research, machine-readable rules/assumptions, config, and a CLI
 | `gauntletsim/visualization.py` | ASCII map | 2 |
 | `gauntletsim/simulation.py` | Phase 2 exploration stub | 2 |
 | `gauntletsim/rng.py` | Named seeded RNG streams | 2 |
-| `resources` (future) | Gather ticks, shard rolls, deplete nodes | 3 |
-| `inventory` (future) | Slots, tools, HP/prayer/run | 3–4 |
-| `crafting` (future) | Singing bowl, cook, potions | 3 |
+| `gauntletsim/inventory.py` | 28-slot inventory + stacks | 3 |
+| `gauntletsim/resources.py` | Gather, depletion, shard rolls | 3 |
+| `gauntletsim/crafting.py` | Singing bowl, cook, egniol | 3 |
+| `gauntletsim/demibosses.py` | Prep encounter drops (simplified) | 3 |
+| `gauntletsim/prep.py` | Prep timer + demo slice | 3 |
 | `combat` (future) | Tick combat vs mobs | 4 |
 | `boss` (future) | Corrupted Hunllef subsystem | 4 |
 | `strategy` (future) | Prep/boss policies A–D | 5 |
@@ -44,7 +46,7 @@ config (account + sim) ────────────────┘
 5. Each tick: strategy observes state → emits action → world applies deterministic transitions + RNG draws from seeded streams.
 6. **EpisodeResult** records outcome, ticks, death cause, gear, and assumption fingerprint → `results/` later.
 
-Phase 2 implements step 3 (dungeon gen) + exploration movement and ASCII viz. Crafting/combat remain later.
+Phase 2 implements step 3 (dungeon gen) + exploration movement and ASCII viz. Phase 3 adds gather/inventory/crafting/demi drops and the prep timer; Hunllef combat remains later.
 
 ## Strategy interface (placeholder)
 

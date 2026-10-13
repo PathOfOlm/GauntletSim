@@ -111,6 +111,33 @@
       "range": {"min": 0.0, "max": 0.2},
       "unit": "probability",
       "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-WEAK",
+      "label": "Ticks to resolve a weak-mob room clear in prep (no full combat sim yet)",
+      "parameter": "combat.prep_weak_kill_ticks",
+      "default": 8,
+      "range": {"min": 4, "max": 20},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-STRONG",
+      "label": "Ticks to resolve a strong-mob pair clear in prep",
+      "parameter": "combat.prep_strong_kill_ticks",
+      "default": 16,
+      "range": {"min": 8, "max": 40},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-DEMI",
+      "label": "Ticks to resolve a demi-boss kill in prep",
+      "parameter": "combat.prep_demi_kill_ticks",
+      "default": 40,
+      "range": {"min": 20, "max": 80},
+      "unit": "ticks",
+      "research_status": "still_unknown"
     }
   ]
 }
