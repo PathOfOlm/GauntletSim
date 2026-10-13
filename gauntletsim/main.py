@@ -10,6 +10,13 @@ from gauntletsim import __version__
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.game_rules import DEFAULT_ASSUMPTIONS_PATH, DEFAULT_RULES_PATH, GameRules
 from gauntletsim.prep import PrepSim
+from gauntletsim.scenarios import (
+    LOADOUT_T3_DUAL_T2ARM,
+    find_loadout_seed,
+    loadout_gaps,
+    loadout_met,
+    run_loadout_scenario,
+)
 from gauntletsim.simulation import Phase2Sim
 
 
@@ -41,6 +48,27 @@ def build_parser() -> argparse.ArgumentParser:
         dest="phase3_5",
         action="store_true",
         help="Phase 3.5 prep demo (tile pathing + tick buckets)",
+    )
+    parser.add_argument(
+        "--loadout",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help=(
+            "Named prep loadout scenario (requires --phase3 / --phase3.5). "
+            f"Known: {LOADOUT_T3_DUAL_T2ARM}"
+        ),
+    )
+    parser.add_argument(
+        "--find-loadout-seed",
+        action="store_true",
+        help="With --loadout, search seeds 0..79 for a completing run (ignores --seed)",
+    )
+    parser.add_argument(
+        "--seed-search-limit",
+        type=int,
+        default=80,
+        help="Upper exclusive bound for --find-loadout-seed (default 80)",
     )
     return parser
 
@@ -85,6 +113,57 @@ def main(argv: list[str] | None = None) -> int:
     for line in phase1_status_lines(rules, config):
         print(line)
 
+    if args.loadout and not (args.phase3 or args.phase3_5):
+        print("error: --loadout requires --phase3 or --phase3.5", file=sys.stderr)
+        return 2
+
+    if (args.phase3 or args.phase3_5) and args.loadout:
+        loadout = args.loadout
+        if args.find_loadout_seed or args.seed is None:
+            found = find_loadout_seed(
+                rules,
+                loadout=loadout,
+                seeds=range(0, max(1, args.seed_search_limit)),
+                account=config.account,
+            )
+            if found is None:
+                print()
+                print(
+                    f"loadout search failed: no seed in "
+                    f"[0, {args.seed_search_limit}) completed {loadout!r}"
+                )
+                # Show last attempt gaps via seed 0 for debugging.
+                sim = run_loadout_scenario(rules, config, loadout=loadout)
+                print()
+                for line in sim.status_lines():
+                    print(line)
+                print(f"loadout_met: {loadout_met(sim)}")
+                print(f"loadout_gaps: {loadout_gaps(sim)}")
+                print()
+                print("--- prep log ---")
+                for line in sim.log:
+                    print(line)
+                return 1
+            seed, sim = found
+            print()
+            print(f"loadout_seed: {seed}")
+        else:
+            sim = run_loadout_scenario(rules, config, loadout=loadout)
+        print()
+        for line in sim.status_lines():
+            print(line)
+        print(f"loadout: {loadout}")
+        print(f"loadout_met: {loadout_met(sim)}")
+        print(f"loadout_gaps: {loadout_gaps(sim)}")
+        print(f"timed_out: {sim.timed_out()}")
+        print()
+        print("--- prep log ---")
+        for line in sim.log:
+            print(line)
+        print()
+        print(sim.ascii_map())
+        return 0 if loadout_met(sim) else 1
+
     if args.phase3 or args.phase3_5:
         sim = PrepSim.create(rules, config, use_tile_pathing=True)
         sim.demo_prep_slice()
@@ -108,7 +187,10 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print(sim.ascii_map())
     else:
-        print("hint: --phase2 for map, --phase3 / --phase3.5 for prep demo")
+        print(
+            "hint: --phase2 for map, --phase3 / --phase3.5 for prep demo, "
+            f"--phase3.5 --loadout {LOADOUT_T3_DUAL_T2ARM} for named loadout"
+        )
 
     return 0
 

@@ -138,6 +138,15 @@ class Inventory:
             for _ in range(qty):
                 self._uniques.remove(item)
 
+    def drop(self, item: ItemId, qty: int | None = None) -> int:
+        """Remove up to qty (default: all). Returns amount dropped."""
+        have = self.count(item)
+        if have <= 0:
+            return 0
+        n = have if qty is None else min(have, qty)
+        self.remove(item, n)
+        return n
+
     def summary(self) -> dict[str, int]:
         out: dict[str, int] = {k.value: v for k, v in sorted(self._stacks.items())}
         for u in self._uniques:

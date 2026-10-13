@@ -312,6 +312,13 @@ class PrepSim:
         self._spend(ticks, "craft", f"craft {slot.value} basic @ bowl")
         return ticks
 
+    def hub_upgrade_armour_attuned(self, slot: ArmourSlot) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.upgrade_armour_attuned(self.player.inventory, slot)
+        self._spend(ticks, "craft", f"craft {slot.value} attuned @ bowl")
+        return ticks
+
     def hub_craft_vial(self) -> int:
         self.approach_station(HubStation.SINGING_BOWL)
         self._require_station(HubStation.SINGING_BOWL)
