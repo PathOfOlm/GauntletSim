@@ -21,7 +21,7 @@ def astar_path(
 ) -> list[Tile] | None:
     """
     Shortest path by Chebyshev steps (diagonal allowed, cost 1).
-    Matches OSRS: diagonal moves cost the same tick rate as orthogonal.
+    Room transitions use doorway-only steps via geometry.can_step.
     """
     if start == goal:
         return [start]
@@ -48,8 +48,11 @@ def astar_path(
                 path.append(came_from[path[-1]])  # type: ignore[arg-type]
             path.reverse()
             return path
-        for nxt in current.neighbors8():
+        for nxt in geometry.step_neighbors(current):
             if not ok(nxt):
+                continue
+            # Extra guard: never accept a step geometry forbids.
+            if not geometry.can_step(current, nxt):
                 continue
             tentative = g_score[current] + 1
             if tentative >= g_score.get(nxt, 1_000_000_000):
@@ -66,3 +69,18 @@ def path_length(path: list[Tile] | None) -> int:
     if not path or len(path) < 2:
         return 0
     return len(path) - 1
+
+
+def path_crosses_rooms_only_via_doorways(
+    geometry: DungeonGeometry, path: list[Tile]
+) -> bool:
+    """Validate every cross-room step is doorway→doorway."""
+    for i in range(len(path) - 1):
+        a, b = path[i], path[i + 1]
+        if geometry.room_of(a) == geometry.room_of(b):
+            continue
+        if not geometry.can_step(a, b):
+            return False
+        if not (geometry.is_doorway_tile(a) and geometry.is_doorway_tile(b)):
+            return False
+    return True

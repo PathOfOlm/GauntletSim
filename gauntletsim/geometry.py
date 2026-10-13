@@ -87,6 +87,40 @@ class DungeonGeometry:
         lx, ly = self.local_of(tile)
         return self.rooms[room].local_walkable(lx, ly)
 
+    def is_doorway_tile(self, tile: Tile) -> bool:
+        room = self.room_of(tile)
+        if room not in self.rooms:
+            return False
+        lx, ly = self.local_of(tile)
+        for opening in self.rooms[room].doorways.values():
+            if (lx, ly) in opening:
+                return True
+        return False
+
+    def can_step(self, src: Tile, dst: Tile) -> bool:
+        """
+        True if dst is a legal one-tile step from src.
+        Cross-room steps only between doorway tiles of orthogonally adjacent rooms
+        (no cutting through perimeter walls; no diagonal room jumps).
+        """
+        if src == dst:
+            return False
+        if max(abs(src.x - dst.x), abs(src.y - dst.y)) != 1:
+            return False
+        if not self.is_walkable(dst):
+            return False
+        a = self.room_of(src)
+        b = self.room_of(dst)
+        if a == b:
+            return True  # dst already verified walkable
+        # Different rooms: orthogonal room adjacency + both tiles are doorways.
+        if a.manhattan(b) != 1:
+            return False
+        return self.is_doorway_tile(src) and self.is_doorway_tile(dst)
+
+    def step_neighbors(self, tile: Tile) -> list[Tile]:
+        return [n for n in tile.neighbors8() if self.can_step(tile, n)]
+
     def spawn_tile(self, start: Coord) -> Tile:
         return self.rooms[start].center_tile()
 

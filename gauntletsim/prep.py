@@ -126,7 +126,59 @@ class PrepSim:
             steps += 1
         return steps
 
+    def _approach_tile(self, goal, *, label: str) -> int:
+        """Full path to a walkable tile; logs move ticks. Returns ticks spent."""
+        if (
+            not self.use_tile_pathing
+            or self.dungeon.geometry is None
+            or self.player.tile is None
+            or goal is None
+        ):
+            return 0
+        if self.player.tile == goal:
+            return 0
+        before = self.player.tick
+        self.movement.travel_to_tile(
+            self.player, goal, self.dungeon.rooms, prep_limit=self.prep_limit
+        )
+        spent = max(0, self.player.tick - before)
+        if spent:
+            self.log.append(f"t={self.player.tick}: move → {label} ({spent} ticks)")
+        return spent
+
+    def _node_approach_tile(self, prefer: NodeType | None = None):
+        """Walkable tile on/adjacent to the next gatherable node."""
+        geom = self.dungeon.geometry
+        assert geom is not None
+        coord = self.player.coord
+        rr = self.gather.room_resources[coord]
+        node = rr.next_gatherable(prefer)
+        if node is None or node.local is None:
+            return geom.rooms[coord].center_tile()
+        rt = geom.rooms[coord]
+        lx, ly = node.local
+        if rt.local_walkable(lx, ly):
+            return rt.to_global(lx, ly)
+        for dx, dy in (
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (-1, -1),
+            (1, -1),
+            (-1, 1),
+        ):
+            nx, ny = lx + dx, ly + dy
+            if rt.local_walkable(nx, ny):
+                return rt.to_global(nx, ny)
+        return rt.center_tile()
+
     def clear_here(self) -> dict[str, int]:
+        # Path to combat tile (room center) before spending fight ticks.
+        if self.use_tile_pathing and self.dungeon.geometry is not None:
+            combat = self.dungeon.geometry.rooms[self.player.coord].center_tile()
+            self._approach_tile(combat, label="combat")
         room = self.dungeon.room(self.player.coord)
         ticks, drops = self.encounters.clear_room(room, self.player.inventory)
         if ticks:
@@ -136,24 +188,9 @@ class PrepSim:
     def gather_here(self, prefer: NodeType | None = None) -> dict:
         if self.timed_out():
             return {}
-        # Small intra-room approach cost: path toward a node offset from center.
-        if (
-            self.use_tile_pathing
-            and self.dungeon.geometry is not None
-            and self.player.tile is not None
-        ):
-            rt = self.dungeon.geometry.rooms[self.player.coord]
-            # Deterministic node approach tile near center-ish walkable.
-            approach = rt.center_tile()
-            path = self.movement.path_to_tile(
-                self.player, approach, self.dungeon.rooms
-            )
-            if path is not None and len(path) > 1:
-                # Cap approach to a few tiles so gather itself dominates when nearby.
-                short = path[: min(len(path), 5)]
-                self.movement.follow_path(
-                    self.player, short, self.dungeon.rooms, prep_limit=self.prep_limit
-                )
+        if self.use_tile_pathing and self.dungeon.geometry is not None:
+            approach = self._node_approach_tile(prefer)
+            self._approach_tile(approach, label=f"gather:{(prefer.value if prefer else 'any')}")
         ticks, gained = self.gather.gather_one(
             self.player.coord, self.player.inventory, prefer=prefer
         )
@@ -222,14 +259,21 @@ class PrepSim:
         goal = nearest_approach_tile(
             geom, hub, station, discovered=self.dungeon.discovered_coords()
         )
-        before = self.player.tick
-        self.movement.travel_to_tile(
-            self.player, goal, self.dungeon.rooms, prep_limit=self.prep_limit
-        )
-        spent = max(0, self.player.tick - before)
-        if spent:
-            self.log.append(f"t={self.player.tick}: move → {station.value} ({spent} ticks)")
-        return spent
+        return self._approach_tile(goal, label=station.value)
+
+    def approach_boss_door(self) -> int:
+        """Path to the start-side doorway facing the boss room (barrier approach)."""
+        if not self.use_tile_pathing or self.dungeon.geometry is None:
+            return 0
+        from gauntletsim.geometry import doorway_entry_tile
+
+        boss = self.dungeon.layout.boss
+        start = self.dungeon.layout.start
+        # Stand on the start-room doorway abutting the boss.
+        door = doorway_entry_tile(self.dungeon.geometry, boss, start)
+        if self.player.coord != start:
+            self.go_to(start)
+        return self._approach_tile(door, label="boss_door")
 
     def _require_station(self, station: HubStation) -> None:
         if not self.use_tile_pathing or self.dungeon.hub is None:

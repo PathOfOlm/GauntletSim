@@ -32,10 +32,35 @@ NODE_YIELD_KEYS = {
 class ResourceNode:
     node_type: NodeType
     remaining: int
+    # Local tile inside the room (blocked for standing-on; gather from adjacent).
+    local: tuple[int, int] | None = None
 
     @property
     def depleted(self) -> bool:
         return self.remaining <= 0
+
+
+def _place_node_locals(count: int, room_size: int = 16) -> list[tuple[int, int]]:
+    """Deterministic interior placements away from perimeter (assumption layout)."""
+    # Ring of candidate spots inside the walkable interior.
+    spots = [
+        (3, 3),
+        (room_size - 4, 3),
+        (3, room_size - 4),
+        (room_size - 4, room_size - 4),
+        (room_size // 2, 3),
+        (room_size // 2, room_size - 4),
+        (3, room_size // 2),
+        (room_size - 4, room_size // 2),
+        (5, 5),
+        (room_size - 6, 5),
+        (5, room_size - 6),
+        (room_size - 6, room_size - 6),
+    ]
+    out: list[tuple[int, int]] = []
+    for i in range(count):
+        out.append(spots[i % len(spots)])
+    return out
 
 
 @dataclass
@@ -47,11 +72,25 @@ class RoomResources:
     @classmethod
     def from_room_layout(cls, room: Room, yields: dict[str, int]) -> RoomResources:
         instances: list[ResourceNode] = []
-        for ntype, count in room.nodes.items():
+        # Flatten in stable NodeType order for reproducible local placement.
+        planned: list[tuple[NodeType, int]] = []
+        for ntype in NodeType:
+            count = int(room.nodes.get(ntype, 0))
             per = int(yields[NODE_YIELD_KEYS[ntype]])
             for _ in range(count):
-                instances.append(ResourceNode(node_type=ntype, remaining=per))
+                planned.append((ntype, per))
+        locals_ = _place_node_locals(len(planned))
+        for (ntype, per), loc in zip(planned, locals_, strict=True):
+            instances.append(ResourceNode(node_type=ntype, remaining=per, local=loc))
         return cls(nodes=instances)
+
+    def next_gatherable(self, prefer: NodeType | None = None) -> ResourceNode | None:
+        for n in self.nodes:
+            if n.depleted:
+                continue
+            if prefer is None or n.node_type == prefer:
+                return n
+        return None
 
     def has_gatherable(self, prefer: NodeType | None = None) -> bool:
         for n in self.nodes:
@@ -125,16 +164,15 @@ class GatherSystem:
         """
         One gather roll at `coord`. Returns (ticks_spent, items_gained).
         Respects inventory capacity; raises if no space for the primary item.
+        Caller must path to the node tile (or adjacency) before invoking.
         """
         rr = self.room_resources.get(coord)
         if rr is None or not rr.has_gatherable(prefer):
             raise GatherError("nothing to gather here")
 
-        node = next(
-            n
-            for n in rr.nodes
-            if not n.depleted and (prefer is None or n.node_type == prefer)
-        )
+        node = rr.next_gatherable(prefer)
+        if node is None:
+            raise GatherError("nothing to gather here")
         item = NODE_TO_ITEM[node.node_type]
 
         # Success: ore/fish Always; others use assumption.
