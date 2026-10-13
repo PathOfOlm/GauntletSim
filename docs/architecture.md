@@ -12,10 +12,17 @@ Phase 1 delivers research, machine-readable rules/assumptions, config, and a CLI
 | `data/assumptions/defaults.json` | Labeled defaults + ranges | 1 |
 | `gauntletsim/game_rules.py` | Load/validate JSON; typed accessors | 1 |
 | `gauntletsim/config.py` | Account profile + sim parameters | 1 |
-| `gauntletsim/main.py` | CLI: load data, print Phase 1 status | 1 |
-| `dungeon` (future) | 7×7 graph, seeds, room contents, lighting | 2–3 |
-| `resources` (future) | Nodes, gather ticks, shard rolls | 3 |
-| `inventory` / `player` (future) | Slots, tools, HP/prayer/run, movement | 3–4 |
+| `gauntletsim/main.py` | CLI: status + `--phase2` dungeon ASCII | 1–2 |
+| `gauntletsim/room.py` | Coord, Room, kinds, node/mob enums | 2 |
+| `gauntletsim/map_generator.py` | Seeded 7×7 layout (fish, demis, nodes) | 2 |
+| `gauntletsim/pathfinding.py` | BFS on discovered rooms | 2 |
+| `gauntletsim/player.py` | Position, light/move ticks | 2 |
+| `gauntletsim/dungeon.py` | Mutable dungeon state | 2 |
+| `gauntletsim/visualization.py` | ASCII map | 2 |
+| `gauntletsim/simulation.py` | Phase 2 exploration stub | 2 |
+| `gauntletsim/rng.py` | Named seeded RNG streams | 2 |
+| `resources` (future) | Gather ticks, shard rolls, deplete nodes | 3 |
+| `inventory` (future) | Slots, tools, HP/prayer/run | 3–4 |
 | `crafting` (future) | Singing bowl, cook, potions | 3 |
 | `combat` (future) | Tick combat vs mobs | 4 |
 | `boss` (future) | Corrupted Hunllef subsystem | 4 |
@@ -37,7 +44,7 @@ config (account + sim) ────────────────┘
 5. Each tick: strategy observes state → emits action → world applies deterministic transitions + RNG draws from seeded streams.
 6. **EpisodeResult** records outcome, ticks, death cause, gear, and assumption fingerprint → `results/` later.
 
-Phase 1 stops after step 2 (+ status print).
+Phase 2 implements step 3 (dungeon gen) + exploration movement and ASCII viz. Crafting/combat remain later.
 
 ## Strategy interface (placeholder)
 

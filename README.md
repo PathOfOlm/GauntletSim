@@ -2,7 +2,7 @@
 
 Offline, stdlib-first Python simulator for the **Corrupted Gauntlet** (Old School RuneScape). No LLMs, RL, or GPU dependencies.
 
-**Phase 1 (current):** mechanics research, uncertainty register, machine-readable rules/assumptions, config skeleton, and a CLI status entrypoint. Dungeon/player/combat/boss gameplay arrive in later phases.
+**Phase 2 (current):** Phase 1 rules/config plus seeded 7×7 dungeon generation, exploration movement, and ASCII map (`--phase2`). Crafting/combat/Hunllef arrive later.
 
 ## Requirements
 
@@ -40,7 +40,14 @@ python -m gauntletsim.main
 python -m gauntletsim.main
 ```
 
-Expected: a Phase 1 status summary (rule counts, assumption counts, unresolved unknowns) and exit code 0.
+Expected: status summary (rule/assumption counts) and exit code 0.
+
+Phase 2 dungeon + ASCII map:
+
+```bash
+python -m gauntletsim.main --phase2 --seed 1
+python -m gauntletsim.main --phase2 --seed 1 --explore-fish
+```
 
 ## Tests
 
