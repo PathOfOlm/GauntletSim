@@ -1,0 +1,224 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "notes": "Labeled assumptions only. Not facts. Ranges support later sensitivity analysis."
+  },
+  "assumptions": [
+    {
+      "id": "A-EXPLORE-01",
+      "label": "Ticks to light a new room with the sceptre",
+      "parameter": "exploration.room_light_ticks",
+      "default": 1,
+      "range": {"min": 1, "max": 3},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-EXPLORE-02",
+      "label": "Probability an orthogonal adjacent room edge is passable",
+      "parameter": "dungeon.edge_passable_probability",
+      "default": 0.95,
+      "range": {"min": 0.7, "max": 1.0},
+      "unit": "probability"
+    },
+    {
+      "id": "A-GEN-NODES-01",
+      "label": "Weights for node count 0..5 per resource room",
+      "parameter": "dungeon.node_count_weights",
+      "default": [0.05, 0.15, 0.25, 0.3, 0.15, 0.1],
+      "range": {"description": "6 non-negative weights summing to 1"},
+      "unit": "categorical_weights"
+    },
+    {
+      "id": "A-GEN-FISH-01",
+      "label": "Policy for placing the guaranteed 3-fishing-spot room",
+      "parameter": "dungeon.guaranteed_fish_room_policy",
+      "default": "inner_ring_uniform",
+      "range": {"choices": ["inner_ring_uniform", "any_resource_uniform"]},
+      "unit": "enum"
+    },
+    {
+      "id": "A-DEMI-SPAWN-01",
+      "label": "Extra demi-boss rooms beyond four cardinal guarantees",
+      "parameter": "dungeon.demi_boss_extra_count",
+      "default": 2,
+      "range": {"min": 0, "max": 4},
+      "unit": "count"
+    },
+    {
+      "id": "A-DEMI-SPAWN-02",
+      "label": "Demi-boss type weights bear/dragon/dark_beast",
+      "parameter": "dungeon.demi_boss_type_weights",
+      "default": {"bear": 0.333, "dragon": 0.333, "dark_beast": 0.334},
+      "range": {"description": "each weight 0.2–0.5, sum 1"},
+      "unit": "categorical_weights"
+    },
+    {
+      "id": "A-MOB-STATS-01",
+      "label": "Scale factor on crystalline mob baselines for Corrupted stats",
+      "parameter": "combat.corrupted_mob_stat_scale",
+      "default": 1.15,
+      "range": {"min": 1.0, "max": 1.5},
+      "unit": "multiplier"
+    },
+    {
+      "id": "A-MOB-SPAWN-01",
+      "label": "Weights for none/weak/strong mob presence in a resource room",
+      "parameter": "dungeon.mob_spawn_weights",
+      "default": {"none": 0.2, "weak": 0.45, "strong": 0.35},
+      "range": {"description": "categorical weights summing to 1"},
+      "unit": "categorical_weights"
+    },
+    {
+      "id": "A-GATHER-TICKS-01",
+      "label": "Ticks between gather success rolls",
+      "parameter": "resources.gather_interval_ticks",
+      "default": 4,
+      "range": {"min": 2, "max": 6},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-GATHER-SUCCESS-01",
+      "label": "Success probability per gather roll",
+      "parameter": "resources.gather_success_probability",
+      "default": 1.0,
+      "range": {"min": 0.5, "max": 1.0},
+      "unit": "probability"
+    },
+    {
+      "id": "A-FISH-ONETICK-01",
+      "label": "Ticks to receive fish immediately after vial fill click",
+      "parameter": "resources.post_vial_fish_ticks",
+      "default": 1,
+      "range": {"min": 1, "max": 6},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-SHARD-QTY-CORRUPT-01",
+      "label": "Endpoint scale on monster shard qty relative to wiki crystalline table",
+      "parameter": "resources.monster_shard_qty_override",
+      "default": 1.0,
+      "range": {"min": 0.9, "max": 1.1},
+      "unit": "multiplier"
+    },
+    {
+      "id": "A-PRAYER-DISABLE-01",
+      "label": "Chance a magic-style Hunllef attack disables prayers",
+      "parameter": "boss.prayer_disable_chance",
+      "default": 0.15,
+      "range": {"min": 0.05, "max": 0.35},
+      "unit": "probability"
+    },
+    {
+      "id": "A-FLOOR-DMG-01",
+      "label": "Orange floor damage per tick (min)",
+      "parameter": "boss.floor_damage_min",
+      "default": 10,
+      "range": {"min": 8, "max": 12},
+      "unit": "hitpoints"
+    },
+    {
+      "id": "A-FLOOR-DMG-01b",
+      "label": "Orange floor damage per tick (max)",
+      "parameter": "boss.floor_damage_max",
+      "default": 20,
+      "range": {"min": 18, "max": 25},
+      "unit": "hitpoints"
+    },
+    {
+      "id": "A-FLOOR-PATTERN-01",
+      "label": "Ticks from crimson warn to orange dangerous",
+      "parameter": "boss.floor_warn_ticks",
+      "default": 2,
+      "range": {"min": 1, "max": 5},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-TORNADO-DMG-01",
+      "label": "Which wiki tornado damage table to use",
+      "parameter": "boss.tornado_damage_table",
+      "default": "tornado_page",
+      "range": {"choices": ["tornado_page", "hunllef_page"]},
+      "unit": "enum"
+    },
+    {
+      "id": "A-TORNADO-MOVE-01",
+      "label": "Tornado movement speed",
+      "parameter": "boss.tornado_move_tiles_per_tick",
+      "default": 1,
+      "range": {"min": 1, "max": 2},
+      "unit": "tiles_per_tick"
+    },
+    {
+      "id": "A-STOMP-TRIGGER-01",
+      "label": "When under-boss occupancy triggers stomp",
+      "parameter": "boss.stomp_under_boss_policy",
+      "default": "on_attack_tick",
+      "range": {"choices": ["on_attack_tick", "any_overlap_tick"]},
+      "unit": "enum"
+    },
+    {
+      "id": "A-COMBAT-ACCURACY-01",
+      "label": "Use standard OSRS accuracy/max-hit formulas with wiki gear bonuses",
+      "parameter": "combat.use_standard_osrs_formula",
+      "default": true,
+      "range": {"choices": [true, false]},
+      "unit": "bool"
+    },
+    {
+      "id": "A-WEAPON-SPEED-01",
+      "label": "Default weapon attack speed for corrupted weapons",
+      "parameter": "combat.weapon_attack_speed_ticks",
+      "default": 4,
+      "range": {"min": 4, "max": 5},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-INV-START-SLOTS-01",
+      "label": "Inventory slots occupied by starting tools/items",
+      "parameter": "inventory.starting_occupied_slots",
+      "default": 6,
+      "range": {"min": 5, "max": 8},
+      "unit": "slots"
+    },
+    {
+      "id": "A-COOK-BURN-01",
+      "label": "Probability of burning a paddlefish",
+      "parameter": "crafting.paddlefish_burn_probability",
+      "default": 0.0,
+      "range": {"min": 0.0, "max": 0.2},
+      "unit": "probability"
+    },
+    {
+      "id": "A-HUB-CRAFT-TICKS-01",
+      "label": "Singing-bowl ticks per crafted item",
+      "parameter": "crafting.sing_ticks_per_item",
+      "default": 1,
+      "range": {"min": 1, "max": 3},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-RUN-ENERGY-01",
+      "label": "Run energy drain per tile while running",
+      "parameter": "player.run_drain_per_tile",
+      "default": 0.67,
+      "range": {"min": 0.4, "max": 1.0},
+      "unit": "energy_percent"
+    },
+    {
+      "id": "A-RUN-ENERGY-01b",
+      "label": "Egniol stamina effect duration",
+      "parameter": "player.egniol_stamina_duration_ticks",
+      "default": 160,
+      "range": {"min": 100, "max": 200},
+      "unit": "ticks"
+    },
+    {
+      "id": "A-PRAYER-DRAIN-01",
+      "label": "Effective prayer point drain per tick during boss with protect + offensive prayer",
+      "parameter": "player.prayer_drain_per_tick",
+      "default": 0.2,
+      "range": {"min": 0.1, "max": 0.4},
+      "unit": "prayer_points"
+    }
+  ]
+}
