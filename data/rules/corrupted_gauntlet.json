@@ -11,6 +11,9 @@
     "wiki-egniol": "https://oldschool.runescape.wiki/w/Egniol_potion",
     "wiki-shards": "https://oldschool.runescape.wiki/w/Crystal_shards_(The_Gauntlet)",
     "wiki-game-tick": "https://oldschool.runescape.wiki/w/Game_tick",
+    "wiki-game-square": "https://oldschool.runescape.wiki/w/Game_square",
+    "wiki-teleport-crystal-gauntlet": "https://oldschool.runescape.wiki/w/Teleport_crystal_(The_Gauntlet)",
+    "alora-gauntlet-room-size": "https://rune-server.org/threads/the-gauntlet-on-alora.687769/",
     "wiki-corrupted-shards": "https://oldschool.runescape.wiki/w/Corrupted_shards",
     "wiki-corrupted-bow-perfected": "https://oldschool.runescape.wiki/w/Corrupted_bow_(perfected)",
     "wiki-corrupted-staff-perfected": "https://oldschool.runescape.wiki/w/Corrupted_staff_(perfected)",
@@ -118,6 +121,29 @@
       "source_ids": [
         "wiki-crystal-sceptre",
         "wiki-gauntlet"
+      ]
+    },
+    "walk_tiles_per_tick": {
+      "value": 1,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-game-tick",
+        "wiki-game-square"
+      ]
+    },
+    "run_tiles_per_tick": {
+      "value": 2,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-game-tick",
+        "wiki-game-square"
+      ]
+    },
+    "run_energy_max_units": {
+      "value": 10000,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-energy"
       ]
     }
   },

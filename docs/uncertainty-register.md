@@ -34,6 +34,11 @@ Open assumptions after user answers + wiki recheck. Defaults in `data/assumption
 | `A-PREP-KILL-WEAK` | still_unknown | Prep weak-room clear ticks (no full combat) | `combat.prep_weak_kill_ticks` | 4–20 (default 8) |
 | `A-PREP-KILL-STRONG` | still_unknown | Prep strong-room clear ticks | `combat.prep_strong_kill_ticks` | 8–40 (default 16) |
 | `A-PREP-KILL-DEMI` | still_unknown | Prep demi-boss kill ticks | `combat.prep_demi_kill_ticks` | 20–80 (default 40) |
+| `A-ROOM-SIZE-01` | constrained | Prep room tile footprint (wiki silent; Alora OSRS-cache RE: 16×16) | `topology.room_size_tiles` | 12–20 (default **16**) |
+| `A-DOOR-WIDTH-01` | still_unknown | Doorway width between adjacent prep rooms | `topology.doorway_width_tiles` | 1–3 (default 2) |
+| `A-WALL-DENSITY-01` | still_unknown | Interior blocked-tile density (spawnable walls) | `topology.interior_wall_density` | 0–0.35 (default 0.12) |
+| `A-TELEPORT-TICKS-01` | still_unknown | Teleport crystal activate ticks | `timing.teleport_crystal_ticks` | 1–4 (default 1) |
+| `A-PREP-WEIGHT-01` | still_unknown | Carried weight (kg) for run-energy drain in prep | `player.prep_weight_kg` | 0–30 (default 0) |
 
 ## Wiki check notes (items user asked to verify)
 

@@ -138,6 +138,51 @@
       "range": {"min": 20, "max": 80},
       "unit": "ticks",
       "research_status": "still_unknown"
+    },
+    {
+      "id": "A-ROOM-SIZE-01",
+      "label": "Prep room footprint in tiles (wiki silent; Alora OSRS-cache reverse-eng: 16x16 = 2x2 of 8x8 chunks)",
+      "parameter": "topology.room_size_tiles",
+      "default": 16,
+      "range": {"min": 12, "max": 20},
+      "unit": "tiles",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-DOOR-WIDTH-01",
+      "label": "Doorway opening width between adjacent prep rooms (boss-room community notes imply 2-tile portals; prep rooms undocumented)",
+      "parameter": "topology.doorway_width_tiles",
+      "default": 2,
+      "range": {"min": 1, "max": 3},
+      "unit": "tiles",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-WALL-DENSITY-01",
+      "label": "Fraction of interior tiles blocked by spawnable walls/obstacles (exact Jagex templates unknown)",
+      "parameter": "topology.interior_wall_density",
+      "default": 0.12,
+      "range": {"min": 0.0, "max": 0.35},
+      "unit": "fraction",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-TELEPORT-TICKS-01",
+      "label": "Game ticks to activate Gauntlet teleport crystal back to start (wiki confirms effect; tick cost unstated)",
+      "parameter": "timing.teleport_crystal_ticks",
+      "default": 1,
+      "range": {"min": 1, "max": 4},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-WEIGHT-01",
+      "label": "Assumed carried weight (kg) during Corrupted prep for run-energy drain (kit weights not wiki-aggregated)",
+      "parameter": "player.prep_weight_kg",
+      "default": 0.0,
+      "range": {"min": 0.0, "max": 30.0},
+      "unit": "kg",
+      "research_status": "still_unknown"
     }
   ]
 }

@@ -34,7 +34,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--phase3",
         action="store_true",
-        help="Run Phase 3 prep demo slice (gather/craft path)",
+        help="Run prep demo with tile pathing (Phase 3.5)",
+    )
+    parser.add_argument(
+        "--phase3.5",
+        dest="phase3_5",
+        action="store_true",
+        help="Phase 3.5 prep demo (tile pathing + tick buckets)",
     )
     return parser
 
@@ -79,8 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     for line in phase1_status_lines(rules, config):
         print(line)
 
-    if args.phase3:
-        sim = PrepSim.create(rules, config)
+    if args.phase3 or args.phase3_5:
+        sim = PrepSim.create(rules, config, use_tile_pathing=True)
         sim.demo_prep_slice()
         print()
         for line in sim.status_lines():
@@ -102,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print(sim.ascii_map())
     else:
-        print("hint: --phase2 for map, --phase3 for prep demo")
+        print("hint: --phase2 for map, --phase3 / --phase3.5 for prep demo")
 
     return 0
 

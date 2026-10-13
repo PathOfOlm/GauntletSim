@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from gauntletsim.game_rules import GameRules
+from gauntletsim.geometry import DungeonGeometry, generate_dungeon_geometry
 from gauntletsim.map_generator import DungeonLayout, generate_layout, validate_layout_rules
+from gauntletsim.movement import MovementEngine
 from gauntletsim.pathfinding import reachable_coords, shortest_path
 from gauntletsim.player import MovementError, PlayerState
 from gauntletsim.room import Coord, Room
@@ -17,6 +19,8 @@ class DungeonState:
     player: PlayerState
     light_ticks: int = 1
     move_ticks: int = 1
+    geometry: DungeonGeometry | None = None
+    movement: MovementEngine | None = None
     rules_errors: list[str] = field(default_factory=list)
 
     @classmethod
@@ -24,10 +28,17 @@ class DungeonState:
         layout = generate_layout(rules, master_seed)
         errors = validate_layout_rules(layout, rules)
         light = int(rules.get("timing", "room_light_ticks"))
+        geometry = generate_dungeon_geometry(rules, layout.rooms, master_seed)
+        movement = MovementEngine.create(rules, geometry)
+        player = PlayerState(coord=layout.start, tick=0)
+        player.tile = geometry.spawn_tile(layout.start)
+        player.run_energy = int(rules.get("timing", "run_energy_max_units"))
         state = cls(
             layout=layout,
-            player=PlayerState(coord=layout.start, tick=0),
+            player=player,
             light_ticks=light,
+            geometry=geometry,
+            movement=movement,
             rules_errors=errors,
         )
         # Start is discovered at generation time.

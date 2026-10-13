@@ -1,10 +1,11 @@
-"""Player position, exploration, and prep vitals (Phase 2–3)."""
+"""Player position, exploration, and prep vitals (Phase 2–3.5)."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from gauntletsim.config import AccountProfile
+from gauntletsim.geometry import Tile
 from gauntletsim.inventory import Inventory, ItemId, starting_inventory
 from gauntletsim.room import Coord, Room, RoomKind, orthogonal_neighbors
 
@@ -75,10 +76,16 @@ class PlayerState:
     hitpoints_max: int = 90
     prayer: int = 77
     prayer_max: int = 77
+    agility: int = 70
     inventory: Inventory = field(default_factory=starting_inventory)
     equipment: Equipment = field(default_factory=Equipment)
     timed_out: bool = False
     entered_boss: bool = False
+    # Phase 3.5 tile / energy
+    tile: Tile | None = None
+    run_energy: int = 10000
+    running: bool = True
+    stamina_ticks_remaining: int = 0
 
     @classmethod
     def from_account(cls, coord: Coord, account: AccountProfile) -> PlayerState:
@@ -88,7 +95,10 @@ class PlayerState:
             hitpoints_max=account.hitpoints,
             prayer=account.prayer,
             prayer_max=account.prayer,
+            agility=account.agility,
             inventory=starting_inventory(),
+            run_energy=10000,
+            running=True,
         )
 
     def advance(self, ticks: int, prep_limit: int) -> None:
@@ -99,13 +109,24 @@ class PlayerState:
     def remaining_prep_ticks(self, prep_limit: int) -> int:
         return max(0, prep_limit - self.tick)
 
-    def drink_egniol(self, prayer_restore: int, run_energy_percent: int = 40) -> None:
+    def drink_egniol(
+        self,
+        prayer_restore: int,
+        run_energy_percent: int = 40,
+        *,
+        energy_max: int = 10000,
+        stamina_ticks: int = 200,
+    ) -> None:
         if not self.inventory.has(ItemId.EGNIOL_3):
             raise ValueError("no egniol")
         self.inventory.remove(ItemId.EGNIOL_3)
         self.prayer = min(self.prayer_max, self.prayer + prayer_restore)
-        # run energy tracked later; percent accepted for API completeness
-        _ = run_energy_percent
+        self.run_energy = min(
+            energy_max,
+            self.run_energy + int(energy_max * (run_energy_percent / 100.0)),
+        )
+        self.stamina_ticks_remaining = max(self.stamina_ticks_remaining, stamina_ticks)
+        self.running = True
 
     def eat_paddlefish(self, heal: int = 20) -> None:
         if not self.inventory.has(ItemId.PADDLEFISH):
@@ -124,6 +145,7 @@ class PlayerState:
         move_ticks: int = 1,
         prep_limit: int | None = None,
     ) -> int:
+        """Legacy room-hop API (Phase 2 / coarse). Prefer MovementEngine in Phase 3.5."""
         if target not in rooms:
             raise MovementError(f"no room at {target}")
         if target not in orthogonal_neighbors(self.coord, width, height):

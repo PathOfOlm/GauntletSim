@@ -60,11 +60,31 @@
 
 | Field | Value |
 |-------|-------|
-| Statement | The crystal/corrupted sceptre is required to light nodes (visit new rooms). Exact adjacency graph, door count, and lighting tick cost are not fully specified for simulation. |
-| Source | https://oldschool.runescape.wiki/w/The_Gauntlet |
-| Confidence | `strongly_supported` (sceptre required); door/lighting timing `unknown` → see uncertainty register `A-EXPLORE-01` |
-| Intended module | `dungeon` / `player` |
+| Statement | The crystal/corrupted sceptre is required to light nodes (visit new rooms). Lighting costs **1 tick** (user-confirmed → rules `timing.room_light_ticks`). Door count / doorway geometry are not wiki-specified → assumptions `A-DOOR-WIDTH-01`. |
+| Source | https://oldschool.runescape.wiki/w/The_Gauntlet ; user-play-experience |
+| Confidence | `strongly_supported` (sceptre + 1-tick light) |
+| Intended module | `dungeon` / `player` / `movement` |
 | Test id | `test_rules_sceptre_required` |
+
+### R-TOPO-05 — Prep room tile footprint (assumption-backed)
+
+| Field | Value |
+|-------|-------|
+| Statement | Wiki does not state prep-room tile size. Private-server reverse-engineering of OSRS map chunks reports Gauntlet rooms as **16×16** tiles (2×2 of 8×8 chunks). Simulator default via `A-ROOM-SIZE-01`. |
+| Source | https://rune-server.org/threads/the-gauntlet-on-alora.687769/ |
+| Confidence | `inferred` / labeled assumption (not rules JSON) |
+| Intended module | `geometry` |
+| Test id | `test_room_geometry_size` |
+
+### R-TOPO-06 — Spawnable walls / obstacles
+
+| Field | Value |
+|-------|-------|
+| Statement | Prep rooms contain scenery that blocks tiles; exact wall templates and spawn rules are not documented on the wiki. Modeled as seeded interior blocked-tile density (`A-WALL-DENSITY-01`) with doorway connectivity preserved. |
+| Source | gameplay observation; wiki silent on templates |
+| Confidence | `unknown` → assumption |
+| Intended module | `geometry` / `tile_pathfinding` |
+| Test id | `test_walls_force_detour` |
 
 ---
 
@@ -89,6 +109,36 @@
 | Confidence | `verified` |
 | Intended module | `sim` |
 | Test id | `test_rules_tick_seconds` |
+
+### R-PREP-02b — Walk / run tiles per tick
+
+| Field | Value |
+|-------|-------|
+| Statement | Walking covers **1** game square per tick; running covers **2**. Diagonal moves use the same rates. |
+| Source | https://oldschool.runescape.wiki/w/Game_tick ; https://oldschool.runescape.wiki/w/Game_square |
+| Confidence | `verified` |
+| Intended module | `movement` |
+| Test id | `test_rules_walk_run_tiles` |
+
+### R-PREP-02c — Run energy (standard OSRS)
+
+| Field | Value |
+|-------|-------|
+| Statement | Run energy uses the standard OSRS internal 0–10000 unit formulas (Agility + weight drain while running; regen while walking/stationary). Gauntlet does not replace this formula. Egniol restores 40% energy and applies stamina drain multiplier. |
+| Source | https://oldschool.runescape.wiki/w/Energy ; https://oldschool.runescape.wiki/w/Egniol_potion |
+| Confidence | `verified` (formula) / `strongly_supported` (applies inside Gauntlet) |
+| Intended module | `movement` / `player` |
+| Test id | `test_run_energy_drain` |
+
+### R-PREP-02d — Teleport crystal (prep)
+
+| Field | Value |
+|-------|-------|
+| Statement | Teleport crystal returns the player to the starting room; cannot be used in start or boss room. Activation **tick cost** is not stated on the wiki → `A-TELEPORT-TICKS-01`. |
+| Source | https://oldschool.runescape.wiki/w/Teleport_crystal_(The_Gauntlet) |
+| Confidence | `verified` (effect); tick cost `unknown` |
+| Intended module | `prep` / `movement` |
+| Test id | `test_teleport_crystal` |
 
 ### R-PREP-03 — Prep duration in ticks
 
