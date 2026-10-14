@@ -89,6 +89,7 @@ class PrepEncounters:
             shards = self._add_shards(inv, "weak")
             if shards:
                 drops["shards"] = shards
+            self._roll_secondary_drops(inv, "weak", drops, rolls=1)
 
         elif room.mob_tier == MobTier.STRONG:
             ticks = int(self.rules.assumption_default("combat.prep_strong_kill_ticks"))
@@ -103,6 +104,7 @@ class PrepEncounters:
             shards = self._add_shards(inv, "strong")
             if shards:
                 drops["shards"] = shards
+            self._roll_secondary_drops(inv, "strong", drops, rolls=2)
 
         elif room.mob_tier == MobTier.DEMI_BOSS:
             ticks = int(self.rules.assumption_default("combat.prep_demi_kill_ticks"))
@@ -128,6 +130,40 @@ class PrepEncounters:
                 inv.add(give)
                 self.state.t3_parts.add(give)
                 drops[give.value] = 1
+            # Demi secondary loot uses strong table once (assumption).
+            self._roll_secondary_drops(inv, "strong", drops, rolls=1)
 
         self.state.cleared_rooms.add(room.coord)
         return ticks, drops
+
+    def _roll_secondary_drops(
+        self,
+        inv: Inventory,
+        tier: str,
+        drops: dict[str, int],
+        *,
+        rolls: int,
+    ) -> None:
+        """Fish / grym / tele crystal — verified to exist; rates are assumptions."""
+        if not self.rules.get("resources", "monsters_drop_fish_grym_teleport"):
+            return
+        try:
+            table = self.rules.assumption_default(
+                "enemies.monster_secondary_drop_chances"
+            )
+        except KeyError:
+            return
+        tier_table = table.get(tier, {})
+        mapping = (
+            ("raw_paddlefish", ItemId.RAW_PADDLEFISH),
+            ("grym_leaf", ItemId.GRYM_LEAF),
+            ("teleport_crystal", ItemId.TELEPORT_CRYSTAL),
+        )
+        for _ in range(rolls):
+            for key, item in mapping:
+                chance = float(tier_table.get(key, 0.0))
+                if chance <= 0 or self.rng.random() >= chance:
+                    continue
+                if inv.can_add(item, 1):
+                    inv.add(item, 1)
+                    drops[key] = drops.get(key, 0) + 1

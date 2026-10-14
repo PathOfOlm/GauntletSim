@@ -194,7 +194,15 @@ class PrepSim:
             combat = self.dungeon.geometry.rooms[self.player.coord].center_tile()
             self._approach_tile(combat, label="combat")
         room = self.dungeon.room(self.player.coord)
+        # Protect Magic before demi rooms (video meta); damage not modeled yet.
+        if room.mob_tier.value == "demi_boss" and self.player.protect_prayer != "magic":
+            self.player.protect_prayer = "magic"
+            self.log.append(
+                f"t={self.player.tick}: protect_magic before demi @ "
+                f"({room.coord.x},{room.coord.y})"
+            )
         ticks, drops = self.encounters.clear_room(room, self.player.inventory)
+        self._last_fight_ticks = ticks
         if ticks:
             self._spend(ticks, "fight", f"clear {room.mob_tier.value} {drops}")
         return drops
@@ -208,6 +216,7 @@ class PrepSim:
         ticks, gained = self.gather.gather_one(
             self.player.coord, self.player.inventory, prefer=prefer
         )
+        self._last_gather_ticks = getattr(self, "_last_gather_ticks", 0) + ticks
         self._spend(
             ticks, "gather", f"gather { {k.value: v for k, v in gained.items()} }"
         )
@@ -215,6 +224,95 @@ class PrepSim:
         if rr.all_depleted():
             self.dungeon.room(self.player.coord).searched_depleted = True
         return gained
+
+    def begin_room_visit_overlap(self) -> None:
+        """Reset per-visit fight/gather counters used for overlap rebate."""
+        self._last_fight_ticks = 0
+        self._last_gather_ticks = 0
+
+    def apply_fight_gather_overlap(self) -> int:
+        """
+        Deterministic rebate when fight+gather happen in the same room visit.
+
+        rebate = int(min(fight, gather) * overlap_fraction) removed from fight bucket.
+        """
+        fight = int(getattr(self, "_last_fight_ticks", 0))
+        gather = int(getattr(self, "_last_gather_ticks", 0))
+        if fight <= 0 or gather <= 0:
+            return 0
+        try:
+            frac = float(
+                self.rules.assumption_default(
+                    "combat.prep_fight_gather_overlap_fraction"
+                )
+            )
+        except KeyError:
+            frac = 0.0
+        rebate = int(min(fight, gather) * frac)
+        if rebate <= 0:
+            return 0
+        rebate = min(rebate, self.player.tick, self.ledger.fight)
+        self.player.tick -= rebate
+        if self.player.tick < self.prep_limit:
+            self.player.timed_out = False
+        self.ledger.fight -= rebate
+        self.log.append(
+            f"t={self.player.tick}: fight+gather overlap rebate={rebate} "
+            f"(fight={fight} gather={gather} frac={frac})"
+        )
+        self._last_fight_ticks = 0
+        self._last_gather_ticks = 0
+        return rebate
+
+    def fill_vial_at_fish(self) -> int:
+        """Fill an empty vial at a fishing spot (not only the hub pump)."""
+        if not self.rules.get("resources", "fill_vial_at_fishing_spot"):
+            raise HubError("fill_vial_at_fishing_spot disabled in rules")
+        room = self.dungeon.room(self.player.coord)
+        has_fish = room.fishing_spots >= 1 or room.nodes.get(NodeType.FISH, 0) > 0
+        if not has_fish:
+            raise HubError("no fishing spot in this room")
+        if self.use_tile_pathing and self.dungeon.geometry is not None:
+            approach = self._node_approach_tile(NodeType.FISH)
+            self._approach_tile(approach, label="fill_vial@fish")
+        ticks = self.crafting.fill_vial(self.player.inventory)
+        self._spend(ticks, "craft", "fill vial @ fishing spot")
+        return ticks
+
+    def craft_egniol_field(self) -> int:
+        """Make one egniol from water vial + grym + dust (no hub station required)."""
+        inv = self.player.inventory
+        ticks = self.crafting.make_grym_unf(inv)
+        ticks += self.crafting.make_egniol(inv)
+        self._spend(ticks, "craft", "egniol on the move")
+        return ticks
+
+    def crush_spare_t3(self, item: ItemId) -> int:
+        ticks = self.crafting.crush_t3_component(self.player.inventory, item)
+        self._spend(ticks, "craft", f"crush {item.value} → shards")
+        return ticks
+
+    def sip_egniol_if_low_energy(self, *, threshold_units: int = 2500) -> bool:
+        """Drink egniol when run energy is low during prep (stamina + prayer)."""
+        inv = self.player.inventory
+        if not inv.has(ItemId.EGNIOL_3):
+            return False
+        if self.player.run_energy >= threshold_units:
+            return False
+        restore = self.crafting.egniol_prayer_restore(self.config.account.prayer)
+        energy_pct = int(self.rules.get("crafting", "egniol_run_energy_percent"))
+        stamina = int(self.rules.get("timing", "stamina_effect_ticks"))
+        energy_max = int(self.rules.get("timing", "run_energy_max_units"))
+        self.player.drink_egniol(
+            restore,
+            energy_pct,
+            energy_max=energy_max,
+            stamina_ticks=stamina,
+        )
+        self.log.append(
+            f"t={self.player.tick}: sip egniol (energy→{self.player.run_energy})"
+        )
+        return True
 
     def teleport_to_start(self) -> bool:
         """Use teleport crystal if available (not already at start)."""
@@ -349,6 +447,13 @@ class PrepSim:
         self._require_station(HubStation.SINGING_BOWL)
         ticks = self.crafting.craft_vial(self.player.inventory)
         self._spend(ticks, "craft", "craft vial @ bowl")
+        return ticks
+
+    def hub_craft_teleport_crystal(self) -> int:
+        self.approach_station(HubStation.SINGING_BOWL)
+        self._require_station(HubStation.SINGING_BOWL)
+        ticks = self.crafting.craft_teleport_crystal(self.player.inventory)
+        self._spend(ticks, "craft", "craft teleport crystal @ bowl")
         return ticks
 
     def hub_fill_vial(self) -> int:

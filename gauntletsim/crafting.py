@@ -234,3 +234,25 @@ class CraftingBench:
         div = int(self.rules.get("crafting", "egniol_prayer_restore_divisor"))
         flat = int(self.rules.get("crafting", "egniol_prayer_restore_flat"))
         return prayer_level // div + flat
+
+    def crush_t3_component(self, inv: Inventory, item: ItemId) -> int:
+        """Pestle a spare T3 demi component into crystal shards."""
+        if item not in (ItemId.SPIKE, ItemId.ORB, ItemId.BOWSTRING):
+            raise ValueError(f"cannot crush {item}")
+        self._need(inv, item, 1)
+        self._need(inv, ItemId.PESTLE, 1)
+        shards = int(self.rules.get("crafting", "crush_t3_component_shards"))
+        inv.remove(item, 1)
+        if not inv.can_add(ItemId.SHARDS, shards):
+            raise InventoryError("no space for crushed shards")
+        inv.add(ItemId.SHARDS, shards)
+        return 1
+
+    def craft_teleport_crystal(self, inv: Inventory) -> int:
+        shards = int(self.rules.get("crafting", "teleport_crystal_shards"))
+        self._need(inv, ItemId.SHARDS, shards)
+        if not inv.can_add(ItemId.TELEPORT_CRYSTAL):
+            raise InventoryError("no space for teleport crystal")
+        inv.remove(ItemId.SHARDS, shards)
+        inv.add(ItemId.TELEPORT_CRYSTAL)
+        return self.sing_ticks

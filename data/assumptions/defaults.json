@@ -199,6 +199,35 @@
       "range": {"description": "local [lx,ly] per station name; N=low ly in geometry"},
       "unit": "local_tile_map",
       "research_status": "constrained"
+    },
+    {
+      "id": "A-MOB-SECONDARY-DROPS",
+      "label": "Per-kill chance weak/strong drop raw paddlefish, grym leaf, or teleport crystal (wiki confirms drops exist; rates unlabeled)",
+      "parameter": "enemies.monster_secondary_drop_chances",
+      "default": {
+        "weak": {
+          "raw_paddlefish": 0.18,
+          "grym_leaf": 0.04,
+          "teleport_crystal": 0.02
+        },
+        "strong": {
+          "raw_paddlefish": 0.28,
+          "grym_leaf": 0.08,
+          "teleport_crystal": 0.05
+        }
+      },
+      "range": {"description": "per-item probability 0..1 for weak/strong; demi uses strong table once"},
+      "unit": "probability_table",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-FIGHT-GATHER-OVERLAP",
+      "label": "Fraction of min(fight,gather) ticks rebated when clearing then gathering in the same room visit (kite/overlap model)",
+      "parameter": "combat.prep_fight_gather_overlap_fraction",
+      "default": 0.35,
+      "range": {"min": 0.0, "max": 0.75},
+      "unit": "fraction",
+      "research_status": "still_unknown"
     }
   ]
 }

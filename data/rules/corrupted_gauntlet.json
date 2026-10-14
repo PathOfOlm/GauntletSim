@@ -340,6 +340,22 @@
         "wiki-shards"
       ]
     },
+    "fill_vial_at_fishing_spot": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-strategies"
+      ]
+    },
+    "monsters_drop_fish_grym_teleport": {
+      "value": true,
+      "confidence": "verified",
+      "source_ids": [
+        "wiki-gauntlet",
+        "wiki-strategies"
+      ]
+    },
     "paddlefish_stop_burn_cooking_level": {
       "value": 47,
       "confidence": "verified",

@@ -86,6 +86,8 @@ class PlayerState:
     run_energy: int = 10000
     running: bool = True
     stamina_ticks_remaining: int = 0
+    # Prep combat overhead (Protect Magic/Missiles/Melee); damage not modeled yet.
+    protect_prayer: str | None = None
 
     @classmethod
     def from_account(cls, coord: Coord, account: AccountProfile) -> PlayerState:
