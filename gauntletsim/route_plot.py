@@ -56,7 +56,7 @@ def _room_color_key(state: DungeonState, coord: Coord) -> str:
         return "start"
     if room.mob_tier == MobTier.DEMI_BOSS:
         return "demi"
-    if room.fishing_spots >= 3 and coord == state.layout.fish_room:
+    if room.fishing_spots >= 3:
         return "fish"
     if room.mob_tier == MobTier.STRONG:
         return "strong"

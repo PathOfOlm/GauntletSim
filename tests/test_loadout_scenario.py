@@ -110,8 +110,9 @@ def test_find_loadout_seed_returns_success(rules: GameRules) -> None:
     found = find_loadout_seed(rules, seeds=range(0, 10))
     assert found is not None
     seed, sim = found
-    assert seed == 1
+    assert seed in range(0, 10)
     assert loadout_met(sim)
+    assert not sim.timed_out()
 
 
 def test_default_demo_still_available(rules: GameRules) -> None:

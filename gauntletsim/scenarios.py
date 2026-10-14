@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from gauntletsim.config import AppConfig, SimConfig
 from gauntletsim.crafting import ArmourSlot, WeaponStyle
+from gauntletsim.fog import FogKnowledge, KnownRoom, LayoutFogProxy
 from gauntletsim.game_rules import GameRules
 from gauntletsim.hub import HubError, HubStation
 from gauntletsim.inventory import ItemId
@@ -80,11 +81,23 @@ def loadout_gaps(sim: PrepSim, goal: LoadoutGoal = GOAL_T3_DUAL) -> list[str]:
 
 
 class LoadoutScenario:
-    """Tick-accurate prep agent aiming for a named loadout."""
+    """Tick-accurate prep agent aiming for a named loadout (fog-of-war only)."""
 
-    def __init__(self, sim: PrepSim, goal: LoadoutGoal = GOAL_T3_DUAL) -> None:
+    def __init__(
+        self,
+        sim: PrepSim,
+        goal: LoadoutGoal = GOAL_T3_DUAL,
+        *,
+        enforce_fog: bool = True,
+    ) -> None:
         self.sim = sim
         self.goal = goal
+        self.fog = FogKnowledge(sim)
+        # Capture start from spawn (already discovered) — do not read layout.start later.
+        self._start = self.fog.start()
+        if enforce_fog:
+            # Block omniscient peeks for the rest of this agent run.
+            sim.dungeon.layout = LayoutFogProxy(sim.dungeon.layout)  # type: ignore[assignment]
 
     @property
     def inv(self):
@@ -114,7 +127,7 @@ class LoadoutScenario:
         if self.inv.has(ItemId.TELEPORT_CRYSTAL):
             self.sim.teleport_to_start()
         else:
-            self.sim.go_to(self.sim.dungeon.layout.start)
+            self.sim.go_to(self._start)
 
     def _visit_and_clear(self, coord: Coord) -> None:
         if self.sim.timed_out():
@@ -125,6 +138,9 @@ class LoadoutScenario:
         self.sim.clear_here()
 
     def _gather_type(self, coord: Coord, ntype: NodeType, until: int, item: ItemId) -> None:
+        # Only gather in rooms we have discovered (go_to lights them).
+        if not self.fog.is_discovered(coord):
+            return
         while (
             not self.sim.timed_out()
             and self.inv.count(item) < until
@@ -182,136 +198,148 @@ class LoadoutScenario:
             "fish": max(0, TARGET_FISH - self.inv.count(ItemId.RAW_PADDLEFISH)),
         }
 
-    def _room_supply_score(self, coord: Coord) -> int:
-        """How many needed gather units this room can still provide."""
-        d = self._deficits()
-        if not any(d.values()):
-            return 0
-        rr = self.sim.gather.room_resources[coord]
-        score = 0
-        mapping = (
-            (NodeType.ORE, "ore"),
-            (NodeType.PHREN, "bark"),
-            (NodeType.LINUM, "linum"),
-            (NodeType.GRYM, "grym"),
-            (NodeType.FISH, "fish"),
-        )
-        for ntype, key in mapping:
-            need = d[key]
-            if need <= 0:
-                continue
-            avail = sum(n.remaining for n in rr.nodes if n.node_type == ntype)
-            score += min(need, avail)
-        return score
-
     def _gather_needed_here(self, coord: Coord) -> None:
+        if not self.fog.is_discovered(coord):
+            return
+        known = self.fog.observe(coord)
         d = self._deficits()
-        if d["ore"]:
+        if d["ore"] and known.gather_remaining.get(NodeType.ORE, 0):
             self._gather_type(coord, NodeType.ORE, TARGET_ORE, ItemId.ORE)
-        if d["bark"]:
+        if d["bark"] and known.gather_remaining.get(NodeType.PHREN, 0):
             self._gather_type(coord, NodeType.PHREN, TARGET_BARK, ItemId.BARK)
-        if d["linum"]:
+        if d["linum"] and known.gather_remaining.get(NodeType.LINUM, 0):
             self._gather_type(coord, NodeType.LINUM, TARGET_LINUM, ItemId.LINUM)
-        if d["grym"]:
+        if d["grym"] and known.gather_remaining.get(NodeType.GRYM, 0):
             self._gather_type(coord, NodeType.GRYM, TARGET_GRYM, ItemId.GRYM_LEAF)
-        if d["fish"]:
+        if d["fish"] and known.gather_remaining.get(NodeType.FISH, 0):
             self._gather_type(
                 coord, NodeType.FISH, TARGET_FISH, ItemId.RAW_PADDLEFISH
             )
 
-    def phase_scout_and_gather(self) -> None:
-        """Targeted route: fish → needed demis → shop mats → hub."""
-        layout = self.sim.dungeon.layout
+    def _react_in_room(self, coord: Coord) -> None:
+        """After lighting a room: clear/gather based on observed contents only."""
+        if self.sim.timed_out() or not self.fog.is_discovered(coord):
+            return
+        known = self.fog.observe(coord)
+        need_parts = not self._parts_ok()
+        need_frames = not self._frames_ok()
+        need_shards = not self._shards_ok()
+        # Prefer clearing demis when hunting T3 parts / frames.
+        if known.is_demi and not known.cleared and (need_parts or need_frames or need_shards):
+            self.sim.clear_here()
+            known = self.fog.observe(coord)
+        elif known.has_combat and (need_frames or need_shards):
+            self.sim.clear_here()
+            known = self.fog.observe(coord)
+        if known.supply_for(self._deficits()) > 0:
+            self._gather_needed_here(coord)
 
-        # 1) Guaranteed fish room — food + first frame/shards from mobs.
-        self._visit_and_clear(layout.fish_room)
-        self._gather_type(
-            layout.fish_room, NodeType.FISH, TARGET_FISH, ItemId.RAW_PADDLEFISH
-        )
+    def _pick_known_work(self) -> Coord | None:
+        """Choose a discovered room that still helps deficits / combat needs."""
+        here = self.sim.player.coord
+        deficits = self._deficits()
+        candidates: list[tuple[tuple, Coord]] = []
 
-        # 2) Only the demis we need for orb / bowstring (+ frames). Stop early.
-        demis = list(layout.demi_rooms)
-        demis.sort(
-            key=lambda c: (
-                0
-                if self.sim.dungeon.room(c).demi_type
-                in (DemiType.DRAGON, DemiType.DARK_BEAST)
-                else 1,
-                c.manhattan(self.sim.player.coord),
+        for known in self.fog.known_rooms():
+            if known.kind == RoomKind.START:
+                continue
+            supply = known.supply_for(deficits)
+            want_demi = (
+                known.is_demi
+                and not known.cleared
+                and (not self._parts_ok() or not self._frames_ok())
             )
-        )
-        for coord in demis:
-            if self.sim.timed_out():
-                break
-            if self._parts_ok() and self._frames_ok():
-                break
-            self._visit_and_clear(coord)
+            want_combat = (
+                known.has_combat
+                and not known.is_demi
+                and (not self._frames_ok() or not self._shards_ok())
+            )
+            if supply <= 0 and not want_demi and not want_combat:
+                continue
+            # Priority: demi parts → supply → other combat; then distance.
+            demi_rank = 0 if want_demi else 1
+            # Prefer dragon/dark_beast once seen (known demi_type).
+            type_rank = 0
+            if known.demi_type in (DemiType.DRAGON, DemiType.DARK_BEAST):
+                type_rank = -1
+            elif known.demi_type is not None:
+                type_rank = 0
+            supply_rank = -supply
+            combat_rank = 0 if want_combat else 1
+            dist = known.coord.manhattan(here)
+            candidates.append(
+                ((demi_rank, type_rank, supply_rank, combat_rank, dist), known.coord)
+            )
+        if not candidates:
+            return None
+        candidates.sort(key=lambda t: t[0])
+        return candidates[0][1]
 
-        # 3) If still short on frames/shards, clear a few nearby combat rooms.
-        if not self.sim.timed_out() and (not self._frames_ok() or not self._shards_ok()):
-            combat_rooms = [
-                c
-                for c, r in self.sim.dungeon.rooms.items()
-                if r.kind == RoomKind.RESOURCE
-                and r.mob_tier != MobTier.NONE
-                and c not in self.sim.encounters.state.cleared_rooms
-            ]
-            combat_rooms.sort(key=lambda c: c.manhattan(self.sim.player.coord))
-            for coord in combat_rooms:
+    def _pick_frontier(self) -> Coord | None:
+        """Expand fog: prefer doors near boss (fish often adjacent), else nearest."""
+        frontier = self.fog.frontier()
+        if not frontier:
+            return None
+        here = self.sim.player.coord
+        boss = self.fog.boss
+
+        def key(c: Coord) -> tuple:
+            # Corrupted prior: fish room is adjacent to boss — explore those first
+            # when still needing fish (public topology, not a layout peek).
+            boss_adj = 0 if (not self._fish_ok() and c.manhattan(boss) == 1) else 1
+            return (boss_adj, c.manhattan(here), c.x, c.y)
+
+        frontier.sort(key=key)
+        return frontier[0]
+
+    def phase_scout_and_gather(self) -> None:
+        """Explore fog frontier; react to discoveries; gather from known rooms only."""
+        max_iters = 120
+        for _ in range(max_iters):
+            if self.sim.timed_out() or self._gather_ready():
+                break
+            work = self._pick_known_work()
+            if work is not None:
+                known = self.fog.observe(work)
+                need_clear = known.has_combat and (
+                    (known.is_demi and (not self._parts_ok() or not self._frames_ok()))
+                    or (
+                        not known.is_demi
+                        and (not self._frames_ok() or not self._shards_ok())
+                    )
+                )
+                if need_clear:
+                    self._visit_and_clear(work)
+                else:
+                    self.sim.go_to(work)
                 if self.sim.timed_out():
                     break
-                if self._frames_ok() and self._shards_ok():
-                    break
-                # Prefer rooms that also supply missing mats.
-                if self._room_supply_score(coord) <= 0 and self._shards_ok():
-                    continue
-                self._visit_and_clear(coord)
-                self._gather_needed_here(coord)
+                self._gather_needed_here(work)
+                continue
 
-        # 4) Shopping loop: repeatedly visit the nearest room with the most supply.
-        while not self.sim.timed_out() and not self._gather_ready():
-            candidates = [
-                c
-                for c, r in self.sim.dungeon.rooms.items()
-                if r.kind == RoomKind.RESOURCE and self._room_supply_score(c) > 0
-            ]
-            if not candidates:
+            nxt = self._pick_frontier()
+            if nxt is None:
                 self.sim.log.append(
-                    f"gather stuck deficits={self._deficits()} "
+                    f"fog stuck deficits={self._deficits()} "
+                    f"discovered={len(self.fog.discovered_coords())} "
                     f"parts={self._parts_ok()} frames={self._frames_ok()} "
                     f"shards={self.inv.count(ItemId.SHARDS)}"
                 )
                 break
-            candidates.sort(
-                key=lambda c: (
-                    -self._room_supply_score(c),
-                    c.manhattan(self.sim.player.coord),
-                )
-            )
-            coord = candidates[0]
-            # Clear only if we still need shards/frames; otherwise gather-only.
-            need_clear = (
-                coord not in self.sim.encounters.state.cleared_rooms
-                and (
-                    not self._frames_ok()
-                    or not self._shards_ok()
-                    or self.sim.dungeon.room(coord).mob_tier == MobTier.NONE
-                )
-            )
-            if need_clear and self.sim.dungeon.room(coord).mob_tier != MobTier.NONE:
-                self._visit_and_clear(coord)
-            else:
-                self.sim.go_to(coord)
+            self.sim.go_to(nxt)  # lights the room
             if self.sim.timed_out():
                 break
-            self._gather_needed_here(coord)
+            self._react_in_room(nxt)
+        else:
+            self.sim.log.append("fog exploration aborted: max_iters")
 
         self._return_hub()
         self.sim.log.append(
             f"gather phase end tick={self.sim.player.tick} "
             f"ready={self._gather_ready()} deficits={self._deficits()} "
             f"shards={self.inv.count(ItemId.SHARDS)} "
-            f"parts_ok={self._parts_ok()} frames_ok={self._frames_ok()}"
+            f"parts_ok={self._parts_ok()} frames_ok={self._frames_ok()} "
+            f"discovered={len(self.fog.discovered_coords())} fog=1"
         )
 
     def phase_craft_loadout(self) -> None:

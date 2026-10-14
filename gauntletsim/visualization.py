@@ -20,7 +20,7 @@ def _glyph(state: DungeonState, coord: Coord) -> str:
     if room.mob_tier == MobTier.DEMI_BOSS:
         assert room.demi_type is not None
         return {"bear": "B", "dragon": "D", "dark_beast": "K"}[room.demi_type.value]
-    if room.fishing_spots >= 3 and coord == state.layout.fish_room:
+    if room.fishing_spots >= 3:
         return "F"
     if room.mob_tier == MobTier.STRONG:
         return "m"

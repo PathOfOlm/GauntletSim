@@ -369,53 +369,112 @@ class PrepSim:
 
     def demo_prep_slice(self) -> None:
         """
-        Deterministic demo path for a seed:
-        explore fish room → gather fish → clear nearby weak if any →
-        hit one demi if reachable → hub craft basic bow + cook + egniol attempt.
+        Deterministic fog-of-war demo:
+        expand frontier → react to fish/demi/ore when discovered → hub craft.
         """
-        fish = self.dungeon.layout.fish_room
-        self.go_to(fish)
-        self.clear_here()
-        while (
-            not self.timed_out()
-            and self.gather.room_resources[fish].has_gatherable(NodeType.FISH)
-        ):
-            try:
-                self.gather_here(NodeType.FISH)
-            except Exception as exc:  # noqa: BLE001 — demo stops on inventory full
-                self.log.append(f"gather stop: {exc}")
-                break
+        from gauntletsim.fog import FogKnowledge
 
-        demis = list(self.dungeon.layout.demi_rooms)
-        demis.sort(key=lambda c: c.manhattan(self.player.coord))
-        if demis and not self.timed_out():
-            target = demis[0]
-            self.go_to(target)
-            self.clear_here()
+        fog = FogKnowledge(self)
+        start = fog.start()
+        fish_coord = None
+        demi_cleared = False
+        ore_done = False
 
-        self.return_to_start(prefer_teleport=True)
-        for coord, room in self.dungeon.rooms.items():
-            if room.kind != RoomKind.RESOURCE:
-                continue
-            if room.nodes.get(NodeType.ORE, 0) <= 0:
-                continue
+        for _ in range(40):
             if self.timed_out():
                 break
-            self.go_to(coord)
-            self.clear_here()
-            for ntype in (NodeType.ORE, NodeType.PHREN, NodeType.LINUM, NodeType.GRYM):
-                while (
-                    not self.timed_out()
-                    and self.gather.room_resources[coord].has_gatherable(ntype)
-                ):
-                    try:
-                        self.gather_here(ntype)
-                    except Exception:
+            # Gather fish once found.
+            if fish_coord is None:
+                for known in fog.known_rooms():
+                    if known.gather_remaining.get(NodeType.FISH, 0) > 0:
+                        fish_coord = known.coord
                         break
-            if self.player.inventory.count(ItemId.ORE) >= 1:
+            if fish_coord is not None and fog.is_discovered(fish_coord):
+                if self.player.coord != fish_coord:
+                    self.go_to(fish_coord)
+                if not self.timed_out():
+                    known = fog.observe(fish_coord)
+                    if known.has_combat:
+                        self.clear_here()
+                    while (
+                        not self.timed_out()
+                        and self.gather.room_resources[fish_coord].has_gatherable(
+                            NodeType.FISH
+                        )
+                        and self.player.inventory.count(ItemId.RAW_PADDLEFISH) < 8
+                    ):
+                        try:
+                            self.gather_here(NodeType.FISH)
+                        except Exception as exc:  # noqa: BLE001
+                            self.log.append(f"gather stop: {exc}")
+                            break
+
+            # Clear one discovered demi if any.
+            if not demi_cleared and not self.timed_out():
+                demis = fog.known_demis(uncleared_only=True)
+                if demis:
+                    demis.sort(key=lambda k: k.coord.manhattan(self.player.coord))
+                    self.go_to(demis[0].coord)
+                    if not self.timed_out():
+                        self.clear_here()
+                    demi_cleared = True
+
+            # Ore from a known room.
+            if not ore_done and not self.timed_out():
+                ore_rooms = [
+                    k
+                    for k in fog.known_rooms()
+                    if k.gather_remaining.get(NodeType.ORE, 0) > 0
+                ]
+                if ore_rooms:
+                    ore_rooms.sort(key=lambda k: k.coord.manhattan(self.player.coord))
+                    target = ore_rooms[0].coord
+                    self.go_to(target)
+                    if not self.timed_out():
+                        known = fog.observe(target)
+                        if known.has_combat:
+                            self.clear_here()
+                        for ntype in (
+                            NodeType.ORE,
+                            NodeType.PHREN,
+                            NodeType.LINUM,
+                            NodeType.GRYM,
+                        ):
+                            while (
+                                not self.timed_out()
+                                and self.gather.room_resources[target].has_gatherable(
+                                    ntype
+                                )
+                            ):
+                                try:
+                                    self.gather_here(ntype)
+                                except Exception:
+                                    break
+                    ore_done = self.player.inventory.count(ItemId.ORE) >= 1
+
+            if (
+                fish_coord is not None
+                and demi_cleared
+                and ore_done
+            ) or self.timed_out():
                 break
 
+            # Expand fog if still missing pieces.
+            frontier = fog.frontier()
+            if not frontier:
+                break
+            boss = fog.boss
+            frontier.sort(
+                key=lambda c: (
+                    0 if c.manhattan(boss) == 1 else 1,
+                    c.manhattan(self.player.coord),
+                )
+            )
+            self.go_to(frontier[0])
+
         self.return_to_start(prefer_teleport=True)
+        if self.player.coord != start and not self.at_hub():
+            self.go_to(start)
         if self.timed_out():
             self.log.append("prep timed out before crafting")
             return
