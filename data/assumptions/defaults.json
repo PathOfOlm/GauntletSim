@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "notes": "Open assumptions after user answers + wiki recheck. Promoted facts in data/rules/corrupted_gauntlet.json."
+  },
+  "assumptions": [
+    {
+      "id": "A-GEN-NODES-01",
+      "label": "Weights for node count 0..5 per Corrupted resource room (bounds 0-5 mixable verified; distribution unknown)",
+      "parameter": "dungeon.node_count_weights",
+      "default": [0.05, 0.15, 0.25, 0.3, 0.15, 0.1],
+      "range": {"description": "6 non-negative weights summing to 1"},
+      "unit": "categorical_weights",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-DEMI-SPAWN-01",
+      "label": "Extra demi-bosses beyond 4 guaranteed cardinals (Jagex: 4 fixed + additional dotted around edges/corners; count unknown)",
+      "parameter": "dungeon.demi_boss_extra_count",
+      "default": 2,
+      "range": {"min": 0, "max": 4},
+      "unit": "count",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-MOB-SPAWN-01",
+      "label": "Probability a resource room is empty vs weak vs strong (weak≤3, strong pairs verified; odds unknown)",
+      "parameter": "dungeon.mob_spawn_weights",
+      "default": {"none": 0.2, "weak": 0.45, "strong": 0.35},
+      "range": {"description": "categorical weights summing to 1"},
+      "unit": "categorical_weights",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-GATHER-TICKS-01",
+      "label": "Sensitivity band around user-confirmed ~3-tick gather interval (canonical default in rules)",
+      "parameter": "resources.gather_interval_ticks_sensitivity",
+      "default": 3,
+      "range": {"min": 2, "max": 4},
+      "unit": "ticks",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-GATHER-SUCCESS-01",
+      "label": "Success probability for bark/linum/grym rolls (ore+fish Always verified; others unknown)",
+      "parameter": "resources.gather_success_probability_non_ore_fish",
+      "default": 1.0,
+      "range": {"min": 0.9, "max": 1.0},
+      "unit": "probability",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-PRAYER-DISABLE-01",
+      "label": "Chance Hunllef uses prayer-disable exactly once during a mage cycle (user ~80%; wiki has no rate)",
+      "parameter": "boss.prayer_disable_once_per_mage_cycle_chance",
+      "default": 0.8,
+      "range": {"min": 0.6, "max": 0.95},
+      "unit": "probability",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-FLOOR-DMG-01",
+      "label": "Orange floor damage per tick (wiki 10–20 confirmation needed; Strategies 10–25)",
+      "parameter": "boss.floor_damage_min",
+      "default": 10,
+      "range": {"min": 10, "max": 10},
+      "unit": "hitpoints",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-FLOOR-DMG-01b",
+      "label": "Orange floor damage max per tick",
+      "parameter": "boss.floor_damage_max",
+      "default": 25,
+      "range": {"min": 20, "max": 25},
+      "unit": "hitpoints",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-FLOOR-PATTERN-01",
+      "label": "Ticks from crimson warn to orange (phase-dependent; layouts unknown)",
+      "parameter": "boss.floor_warn_ticks",
+      "default": 2,
+      "range": {"min": 1, "max": 4},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-TORNADO-DMG-01",
+      "label": "Residual Hunllef-page vs Tornado-page T1/T3 conflict (canonical=tornado_page)",
+      "parameter": "boss.tornado_damage_hunllef_page_delta",
+      "default": "ignore_hunllef_page_deltas",
+      "range": {"choices": ["ignore_hunllef_page_deltas", "sensitivity_swap_t1_t3"]},
+      "unit": "enum",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-TORNADO-MOVE-01",
+      "label": "Tornado movement speed / pathing / spawn positions",
+      "parameter": "boss.tornado_move_tiles_per_tick",
+      "default": 1,
+      "range": {"min": 1, "max": 2},
+      "unit": "tiles_per_tick",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-COOK-BURN-01",
+      "label": "Burn probability below Cooking 47 (stop-burn at 47 verified)",
+      "parameter": "crafting.paddlefish_burn_probability_below_47",
+      "default": 0.05,
+      "range": {"min": 0.0, "max": 0.2},
+      "unit": "probability",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-WEAK",
+      "label": "Ticks to resolve a weak-mob room clear in prep (no full combat sim yet)",
+      "parameter": "combat.prep_weak_kill_ticks",
+      "default": 8,
+      "range": {"min": 4, "max": 20},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-STRONG",
+      "label": "Ticks to resolve a strong-mob pair clear in prep",
+      "parameter": "combat.prep_strong_kill_ticks",
+      "default": 16,
+      "range": {"min": 8, "max": 40},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-KILL-DEMI",
+      "label": "Ticks to resolve a demi-boss kill in prep",
+      "parameter": "combat.prep_demi_kill_ticks",
+      "default": 40,
+      "range": {"min": 20, "max": 80},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-ROOM-SIZE-01",
+      "label": "Prep room footprint in tiles (wiki silent; Alora OSRS-cache reverse-eng: 16x16 = 2x2 of 8x8 chunks)",
+      "parameter": "topology.room_size_tiles",
+      "default": 16,
+      "range": {"min": 12, "max": 20},
+      "unit": "tiles",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-DOOR-WIDTH-01",
+      "label": "Doorway opening width between adjacent prep rooms (boss-room community notes imply 2-tile portals; prep rooms undocumented)",
+      "parameter": "topology.doorway_width_tiles",
+      "default": 2,
+      "range": {"min": 1, "max": 3},
+      "unit": "tiles",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-WALL-DENSITY-01",
+      "label": "Fraction of interior tiles blocked by spawnable walls/obstacles (exact Jagex templates unknown)",
+      "parameter": "topology.interior_wall_density",
+      "default": 0.12,
+      "range": {"min": 0.0, "max": 0.35},
+      "unit": "fraction",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-TELEPORT-TICKS-01",
+      "label": "Game ticks to activate Gauntlet teleport crystal back to start (wiki confirms effect; tick cost unstated)",
+      "parameter": "timing.teleport_crystal_ticks",
+      "default": 1,
+      "range": {"min": 1, "max": 4},
+      "unit": "ticks",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-PREP-WEIGHT-01",
+      "label": "Assumed carried weight (kg) during Corrupted prep for run-energy drain (kit weights not wiki-aggregated)",
+      "parameter": "player.prep_weight_kg",
+      "default": 0.0,
+      "range": {"min": 0.0, "max": 30.0},
+      "unit": "kg",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-HUB-STATIONS-01",
+      "label": "Start-room hub station local tiles for room_size=16 (quadrants from wiki Starting Room image; exact tile coords unverified)",
+      "parameter": "topology.hub_station_local_tiles",
+      "default": {
+        "singing_bowl": [4, 4],
+        "teleport_platform": [11, 4],
+        "tool_storage": [8, 8],
+        "water_pump": [12, 7],
+        "range": [11, 12],
+        "recipe_guides": [4, 12]
+      },
+      "range": {"description": "local [lx,ly] per station name; N=low ly in geometry"},
+      "unit": "local_tile_map",
+      "research_status": "constrained"
+    },
+    {
+      "id": "A-MOB-SECONDARY-DROPS",
+      "label": "Per-kill chance weak/strong drop raw paddlefish, grym leaf, or teleport crystal (wiki confirms drops exist; rates unlabeled)",
+      "parameter": "enemies.monster_secondary_drop_chances",
+      "default": {
+        "weak": {
+          "raw_paddlefish": 0.18,
+          "grym_leaf": 0.04,
+          "teleport_crystal": 0.02
+        },
+        "strong": {
+          "raw_paddlefish": 0.28,
+          "grym_leaf": 0.08,
+          "teleport_crystal": 0.05
+        }
+      },
+      "range": {"description": "per-item probability 0..1 for weak/strong; demi uses strong table once"},
+      "unit": "probability_table",
+      "research_status": "still_unknown"
+    },
+    {
+      "id": "A-FIGHT-GATHER-OVERLAP",
+      "label": "Fraction of min(fight,gather) ticks rebated when clearing then gathering in the same room visit (kite/overlap model)",
+      "parameter": "combat.prep_fight_gather_overlap_fraction",
+      "default": 0.35,
+      "range": {"min": 0.0, "max": 0.75},
+      "unit": "fraction",
+      "research_status": "still_unknown"
+    }
+  ]
+}

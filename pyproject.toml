@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gauntletsim"
+version = "0.1.0"
+description = "Offline Corrupted Gauntlet simulator (stdlib-first)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "GauntletSim contributors" }]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+viz = ["matplotlib>=3.8", "Pillow>=10.0"]
+
+[project.scripts]
+gauntletsim = "gauntletsim.main:main"
+
+[tool.setuptools.packages.find]
+include = ["gauntletsim*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
